@@ -370,7 +370,7 @@ class FileProcessor:
         if duplicates:
             errors.append(f"Trùng chunk: {duplicates}")
         if out_of_order:
-            errors.append("Chunk bị đảo thứ tự (đã tự sắp xếp lại)")
+            errors.append("Chunk bị đảo thứ tự")
 
         valid = len(missing) == 0
 

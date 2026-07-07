@@ -902,7 +902,7 @@ def run_admin_tests():
             
         v4   = fp.validate_received_chunks(manifest, shuf)
         seq  = [c.get('sequence_number', '?') for c in v4['sorted_chunks']]
-        if 'Chunk bị đảo thứ tự (đã tự sắp xếp lại)' in v4['errors']:
+        if 'Chunk bị đảo thứ tự' in v4['errors']:
             lines.append('   -> [PASS] Phat hien: {}'.format(v4['errors']))
         else:
             lines.append('   -> [FAIL] Khong phat hien dao thu tu! Errors: {}'.format(v4['errors']))
