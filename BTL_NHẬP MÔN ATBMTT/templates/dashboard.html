@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+     alt="Logo"
+     style="height: 80px; margin-bottom: 15px;">
+                <h2 class="text-primary">
+                    <i class="fas fa-user-graduate me-2"></i>
+                    Chào mừng, {{ username }}!
+                </h2>
+                <p class="lead text-muted">Hệ thống nộp bài tập lớn an toàn</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Gửi file bài tập</h5>
+                <p class="card-text">Tải lên file assignment.txt với mã hóa an toàn</p>
+                <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                    <i class="fas fa-upload me-2"></i>Gửi file
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-key fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Quản lý khóa RSA</h5>
+                <p class="card-text">Tạo hoặc tải lên khóa công khai RSA 2048-bit</p>
+                <a href="{{ url_for('manage_keys') }}" class="btn btn-warning">
+                    <i class="fas fa-key me-2"></i>Quản lý khóa
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="fas fa-history fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Lịch sử gửi file</h5>
+                <p class="card-text">Xem lịch sử và trạng thái các file đã gửi</p>
+                <a href="{{ url_for('history') }}" class="btn btn-info">
+                    <i class="fas fa-history me-2"></i>Xem lịch sử
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Hướng dẫn sử dụng
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-step-forward me-2 text-primary"></i>Các bước thực hiện:</h6>
+                        <ol>
+                            <li>Tạo hoặc tải lên khóa công khai RSA</li>
+                            <li>Chọn file bài tập để gửi</li>
+                            <li>Hệ thống tự động mã hóa và ký số</li>
+                            <li>Theo dõi tiến trình gửi file</li>
+                            <li>Kiểm tra kết quả trong lịch sử</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-shield-alt me-2 text-success"></i>Tính năng bảo mật:</h6>
+                        <ul>
+                            <li>Mã hóa RSA-2048 (OAEP) cho SessionKey</li>
+                            <li>Mã hóa AES-256-GCM cho nội dung file</li>
+                            <li>Chữ ký số RSA-PSS (SHA-256)</li>
+                            <li>Kiểm tra tính toàn vẹn HMAC-SHA256 & GCM Tag</li>
+                            <li>Chia file thành các phần (Chunks) an toàn</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

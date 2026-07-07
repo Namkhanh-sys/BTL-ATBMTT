@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý giao dịch - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Quản lý tất cả giao dịch
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Tìm kiếm theo tên file, người dùng...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="success">Thành công</option>
+                                <option value="failed">Thất bại</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary" onclick="exportData()">
+                                <i class="fas fa-download me-2"></i>Xuất dữ liệu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover" id="transactionsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-user me-1"></i>Giảng viên</th>
+                                <th><i class="fas fa-file me-1"></i>Tên file</th>
+                                <th><i class="fas fa-clock me-1"></i>Thời gian</th>
+                                <th><i class="fas fa-puzzle-piece me-1"></i>Số phần</th>
+                                <th><i class="fas fa-hdd me-1"></i>Kích thước</th>
+                                <th><i class="fas fa-check-circle me-1"></i>Trạng thái</th>
+                                <th><i class="fas fa-cogs me-1"></i>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr data-status="{{ transaction.status }}">
+                                <td>
+                                    <code>{{ transaction.id[:8] }}...</code>
+                                </td>
+                                <td>
+                                    <i class="fas fa-user-graduate me-1 text-primary"></i>
+                                    {{ transaction.username }}
+                                </td>
+                                <td>
+                                    <i class="fas fa-file-alt me-1 text-info"></i>
+                                    {{ transaction.filename }}
+                                </td>
+                                <td>
+                                    <small>{{ transaction.timestamp[:19].replace('T', ' ') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ transaction.parts }} phần</span>
+                                </td>
+                                <td>
+                                    {% if transaction.get('file_size') %}
+                                        <small>{{ "%.1f"|format(transaction.file_size / 1024) }} KB</small>
+                                    {% else %}
+                                        <small>N/A</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if transaction.status == 'success' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Thành công
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Thất bại
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewAdminDetails('{{ transaction.id }}')"
+                                                title="Xem chi tiết debug">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" 
+                                                onclick="viewEncryptedFile('{{ transaction.id }}')"
+                                                title="Xem cấu trúc file đã mã hóa">
+                                            <i class="fas fa-file-code"></i>
+                                        </button>
+                                        {% if transaction.status == 'success' %}
+                                        <a href="{{ url_for('download_decrypted_file', transaction_id=transaction.id) }}" 
+                                           class="btn btn-outline-success btn-sm"
+                                           title="Tải file đã giải mã">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có giao dịch nào</h5>
+                    <p class="text-muted">Hệ thống chưa nhận được giao dịch nào từ Giảng viên.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chi tiết debug -->
+<div class="modal fade" id="debugModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-bug me-2"></i>
+                    Chi tiết Debug/Audit
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="debugModalBody">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem file -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="fileModalTitle">
+                    <i class="fas fa-file me-2"></i>
+                    Xem file
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="fileModalBody">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Tìm kiếm và lọc
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+    const table = document.getElementById('transactionsTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    
+    for (let row of rows) {
+        const username = row.cells[1].textContent.toLowerCase();
+        const filename = row.cells[2].textContent.toLowerCase();
+        const rowStatus = row.getAttribute('data-status').toLowerCase();
+        
+        const matchesSearch = username.includes(searchTerm) || filename.includes(searchTerm);
+        const matchesStatus = !statusFilter || rowStatus === statusFilter;
+        
+        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+    }
+}
+
+function viewAdminDetails(transactionId) {
+    const modalBody = document.getElementById('debugModalBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-12">
+                <h6><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin giao thức đề tài:</h6>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Transaction ID:</strong> ${transactionId}<br>
+                                <strong>Timestamp:</strong> ${new Date().toLocaleString('vi-VN')}<br>
+                                <strong>Status:</strong> <span class="badge bg-success">SUCCESS</span><br>
+                                <strong>Protocol:</strong> Socket Communication
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Encryption:</strong> AES-256-GCM (SessionKey)<br>
+                                <strong>Key Exchange:</strong> RSA-2048 (OAEP)<br>
+                                <strong>Signature:</strong> RSA-PSS (SHA-256)<br>
+                                <strong>Integrity/Auth:</strong> HMAC-SHA256 & AES-GCM Tag
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <h6><i class="fas fa-list-ol me-2 text-success"></i>Luồng xử lý theo đề tài:</h6>
+                <div class="timeline">
+                    <div class="alert alert-success">
+                        <strong>1. Handshake:</strong> 
+                        <span class="badge bg-success ms-2">SUCCESS</span>
+                        <br><small class="text-muted">Client gửi "Hello!" → Server phản hồi "Ready!"</small>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>2. Xác thực & Trao khóa:</strong> 
+                        <span class="badge bg-success ms-2">SUCCESS</span>
+                        <br><small class="text-muted">• Ký metadata (tên file + timestamp + số phần) bằng RSA-PSS (SHA-256)</small>
+                        <br><small class="text-muted">• Mã hóa SessionKey bằng RSA-2048 (OAEP)</small>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>3. Mã hóa & Kiểm tra toàn vẹn:</strong> 
+                        <span class="badge bg-success ms-2">SUCCESS</span>
+                        <br><small class="text-muted">• Tạo nonce ngẫu nhiên 96-bit cho mỗi phần</small>
+                        <br><small class="text-muted">• Chia file thành các phần, mã hóa bằng AES-256-GCM</small>
+                        <br><small class="text-muted">• Tính HMAC-SHA256 bảo vệ tính toàn vẹn của phần</small>
+                        <br><small class="text-muted">• Ký số từng phần bằng RSA-PSS (SHA-256)</small>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>4. Phía Người nhận:</strong> 
+                        <span class="badge bg-success ms-2">SUCCESS</span>
+                        <br><small class="text-muted">• Kiểm tra nonce & timestamp chống Replay Attack</small>
+                        <br><small class="text-muted">• Kiểm tra chữ ký RSA-PSS và HMAC-SHA256 từng phần</small>
+                        <br><small class="text-muted">• Giải mã từng phần bằng AES-256-GCM (tag verify tích hợp)</small>
+                        <br><small class="text-muted">• Ghép và lưu file đã giải mã</small>
+                        <br><small class="text-muted">• Gửi ACK tới Người gửi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <h6><i class="fas fa-shield-alt me-2 text-warning"></i>Cấu trúc gói tin (theo đề):</h6>
+                <div class="card">
+                    <div class="card-body">
+                        <pre class="bg-light p-3 rounded"><code>{
+  "file_id": "<UUID>",
+  "chunk_id": "<UUID>",
+  "sequence_number": "<int>",
+  "total_chunks": "<int>",
+  "nonce": "<Base64>",
+  "timestamp": "<ISO>",
+  "cipher": "<Base64>",
+  "tag": "<Base64>",
+  "hmac": "<hex>",
+  "sig": "<Signature>"
+}</code></pre>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <strong>Nonce:</strong> 12 bytes (96-bit GCM)<br>
+                                <strong>Cipher:</strong> AES-256-GCM<br>
+                                <strong>Tag:</strong> 16 bytes (128-bit)
+                            </div>
+                            <div class="col-md-4">
+                                <strong>HMAC:</strong> HMAC-SHA256 (Hex)<br>
+                                <strong>Integrity check:</strong> HMAC & AES-GCM Tag<br>
+                                <strong>Signature:</strong> RSA-PSS (SHA-256)
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Key Exchange:</strong> RSA-2048 OAEP<br>
+                                <strong>SessionKey:</strong> 32 bytes (AES-256)<br>
+                                <strong>Replay Protection:</strong> Active (Nonce + Timestamp)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('debugModal'));
+    modal.show();
+}
+
+function viewEncryptedFile(transactionId) {
+    document.getElementById('fileModalTitle').innerHTML = '<i class="fas fa-file-code me-2"></i>Cấu trúc file đã mã hóa';
+    const modalBody = document.getElementById('fileModalBody');
+    modalBody.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Cấu trúc tệp tin đã mã hóa theo đúng chuẩn Đề tài 6 (gồm Manifest và các Chunks)
+        </div>
+        <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>{
+  "manifest": {
+    "file_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+    "original_filename": "assignment.zip",
+    "total_chunks": 3,
+    "total_size": 20480,
+    "file_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender": "lecturer_user",
+    "nonce": "7a8b9c0d1e2f3a4b",
+    "timestamp": "${new Date().toISOString()}",
+    "session_id": "f5e4d3c2b1a0f9e8",
+    "chunks": [
+      {
+        "chunk_id": "11111111-2222-3333-4444-555555555555",
+        "sequence_number": 1,
+        "size": 6826,
+        "chunk_hash": "2f4e..."
+      }
+    ]
+  },
+  "manifest_signature": "base64_encoded_manifest_signature...",
+  "encrypted_session_key": "base64_encoded_session_key...",
+  "chunks": [
+    {
+      "file_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "chunk_id": "11111111-2222-3333-4444-555555555555",
+      "sequence_number": 1,
+      "total_chunks": 3,
+      "nonce": "base64_encoded_nonce_12_bytes...",
+      "timestamp": "${new Date().toISOString()}",
+      "cipher": "base64_encoded_aes_gcm_ciphertext...",
+      "tag": "base64_encoded_authentication_tag_16_bytes...",
+      "hmac": "hex_encoded_hmac_sha256...",
+      "sig": "base64_encoded_rsa_pss_signature..."
+    }
+  ]
+}</code></pre>
+        <div class="alert alert-success mt-3">
+            <h6><i class="fas fa-check-circle me-2"></i>Đặc điểm kỹ thuật:</h6>
+            <ul class="mb-0">
+                <li><strong>Encryption:</strong> AES-256-GCM với Key 32 bytes & Nonce 12 bytes</li>
+                <li><strong>Key Exchange:</strong> RSA-2048 OAEP (SHA-256)</li>
+                <li><strong>Digital Signature:</strong> RSA-PSS (SHA-256)</li>
+                <li><strong>Integrity:</strong> HMAC-SHA256 trên mỗi chunk và chữ ký trên Manifest</li>
+                <li><strong>Replay Protection:</strong> Nonce tracking với TTL + Timestamp age kiểm tra</li>
+            </ul>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('fileModal'));
+    modal.show();
+}
+
+function exportData() {
+    alert('Tính năng xuất dữ liệu sẽ được triển khai sau.');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{
+  "manifest": {
+    "file_id": "a14aa3df-e98c-40fc-9f06-154d2f72ddfe",
+    "original_filename": "namkhanh1_baitaplon.txt_1781685740.txt",
+    "total_chunks": 3,
+    "total_size": 0,
+    "file_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender": "namkhanh1",
+    "nonce": "2a0ae60b6115855dd5a6cc66b0d4f95b",
+    "timestamp": "2026-06-17T08:42:21.592384+00:00",
+    "session_id": "452aa12b9a40a2d0be3f9d3f0c9fee2e",
+    "chunks": [
+      {
+        "chunk_id": "e4495391-a731-4798-bbbf-9e1e8895058a",
+        "sequence_number": 1,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "chunk_id": "c4402dd8-1f06-4dc4-adf4-cdde304014c4",
+        "sequence_number": 2,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "chunk_id": "b2999895-8217-4120-b787-1670432164ad",
+        "sequence_number": 3,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "manifest_signature": "CjYcJ2KDaSCN7E34xoTf3USvyf9vg4YsCAdCTu4aZpeX1MY2QKW1FlzXTVMFkLWXMfstJ4aPyTGC1Cq9xgtOOSBM9bsg8pGP9r3jgc+xuBidZCGxzO/F6ogtzclr6EHbJawSP4EfohQ2CQ1YUC5Inbln1DVnNifEL3dcB1b/lAjh09rwV7fqjSi9/VJ1egu5bZbqn0XYZ9mZkJmzXsY5a8mjnJq3WX6KMW9KgJWZJP6a/zdFdDqW2pn51Wgk9hfCZ2boLasCY06GPTJHFLV79SRah2xjNJojekFV2m+7d1i+cXOVVcziRk/3kVXhaqsXj2L8hxxIzpJ1DUoHzzc9JA==",
+  "encrypted_session_key": "Brl5DbBvCz3DF4/Cv4L35OHMnudAmPw961II+s/A7h6gCHs4MfSZCJzJKmvueheawos45x/SqnITHWok0Y/Sulmwrwc+Y0R5T9pYVmMSRAL14TzGyWzc0kEGnvCSOiiE6HexTKnj8/HZU3BDIdDNXQB7crGrZMZskIMYe3O2e8vTViqvg5JXU/gU3yGNn7nGmBbEaNcjBXpkyD38lfMAblTUdGp+0d43JZyzfRCPPEStaUgMS7zsLINUMi3TzGsNTgb8iGz8g+OcZWmHZ2JqZfdwb1GW9Gb9P6wsD/OHrrApVIE50RrXneMZ20fAxqnIq7SpsllI0aWcFZR68x36JQ==",
+  "chunks": [
+    {
+      "file_id": "a14aa3df-e98c-40fc-9f06-154d2f72ddfe",
+      "chunk_id": "e4495391-a731-4798-bbbf-9e1e8895058a",
+      "sequence_number": 1,
+      "total_chunks": 3,
+      "nonce": "NiW0w3ChDUhz6X/5",
+      "timestamp": "2026-06-17T08:42:21.682466+00:00",
+      "cipher": "",
+      "tag": "NnSIs4H3X8cmTNazw9FbtQ==",
+      "hmac": "736d3869212241bb1ead807ca3126b9965a64d30d15cccce0ccced1026b40192",
+      "sig": "lfXZrpzGbUo5pKDwLxnmmmTv5h869bKCuB1GQxMO+MgNd8pDVoKNR8F/mC3/ER3CghBr4G/IrKVW+G48W662jOcqKVqppmx8iD4Gs6MoIta+OgemCjOqLCOLizVW4FRfMrqaKBGVIdULi7Tx3wNOItgDoGkoqcL6euBpQ6gCuN35FHSe2Ir4fqZJfChyxLi7z1C9bQ+D2npr1caj9IDae91IAi7xKnw36E8Ohqdo3dCS1YhhKeE99cax+Rwk4KeZWWPLNIWBW8TjElwjKRoX7FR5y+YlJyqW12E7xTkoKtlnvChpK/yZk4FUpNNq+aTAvECIibxAYdyBM9cCT+buGg=="
+    },
+    {
+      "file_id": "a14aa3df-e98c-40fc-9f06-154d2f72ddfe",
+      "chunk_id": "c4402dd8-1f06-4dc4-adf4-cdde304014c4",
+      "sequence_number": 2,
+      "total_chunks": 3,
+      "nonce": "Y1O/GqUDsI/7fMcr",
+      "timestamp": "2026-06-17T08:42:21.726526+00:00",
+      "cipher": "",
+      "tag": "7/zXqJdiEVzV0fwbWQPmcw==",
+      "hmac": "78cdc9848ad471f9e463679ec258edba51ddf026000a4d8a11570c4835fdbb09",
+      "sig": "zPNQY3CXnZ5iLBnIzYjYwIv9YMKcsQHRSSb5PC2ne+QL2nlTAgF8cLncagdONXFmfRCCd0saPKb/HScKgJWCz+yF9lgbcdq2nAbcPSd+66kolkJg4QrQQzeya/EWrvHFAgIe1rjN9nH6Sx8qENUSwMo/x9/tfvQXuAovJPGPO/Ko8wTYY/KYJKd3TXgjfe4HtMLHJGhxBFvzLMCHFPNzq52FQsUQdWkCnZh7yDJhRdzB9mkRNApih1pHHdDmrjDyJRNFEaody0ngue9uTOGYbygw46NJWInAVoS9NiH8bmipgH6MOWUTlZ+GXKEOU5lE1UfPa9mGpsdSEdOYm9cCQw=="
+    },
+    {
+      "file_id": "a14aa3df-e98c-40fc-9f06-154d2f72ddfe",
+      "chunk_id": "b2999895-8217-4120-b787-1670432164ad",
+      "sequence_number": 3,
+      "total_chunks": 3,
+      "nonce": "3E/a3+5KjirPfxZ/",
+      "timestamp": "2026-06-17T08:42:21.771560+00:00",
+      "cipher": "",
+      "tag": "hjpPpCMn9Ft3OVpIOaybGQ==",
+      "hmac": "c2c843f4cd4829d42df8f966e810479e1bacf3f50659da9dbde01397437d2010",
+      "sig": "ecnRSE/UF8W7jwuokfjj7rnVyjFEvtu/QkE4aem8x2X46k1NYEtlC95hj3KEwNu7NXt1eO4p5a3Hi1gphD9373jkjj6KPbz9zwmCqLY7pQPqCe+B5xmAozbSFybu8PAZIrB7rpbqSOgHR/4JV7fAC6YSk0URkGI0S6WBQA8lGSOMO3+Ziaxtp2Y5VAJkPluLYff5zXsdDv3M5kcW9PjvELOpH+QmA9c2GI8P2IO5Sj7Disu5Lx9Hmxvo806O/h8udWJlJs3NY5kl4550rcXkwTEnLhtNPR5VkhUcYaAvfdJtzNIJEkzZa4xlLxoE+Td1RGmzblNyjNuu0PxQ+eQ6fg=="
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                     <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+     alt="Logo"
+     style="height: 80px; margin-bottom: 15px;">
+                <h2 class="text-dark">
+                    <i class="fas fa-user-shield me-2"></i>
+                    Bảng điều khiển Quản trị viên
+                </h2>
+                <p class="lead text-muted">Giám sát và quản lý hệ thống nộp bài tập</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h3>{{ stats.total_users }}</h3>
+                <p class="mb-0">Tổng số Giảng viên</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-exchange-alt fa-3x mb-3"></i>
+                <h3>{{ stats.total_transactions }}</h3>
+                <p class="mb-0">Tổng số giao dịch</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h3>{{ stats.successful_transactions }}</h3>
+                <p class="mb-0">Giao dịch thành công</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-times-circle fa-3x mb-3"></i>
+                <h3>{{ stats.failed_transactions }}</h3>
+                <p class="mb-0">Giao dịch thất bại</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Quản lý giao dịch
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-list fa-3x text-secondary mb-3"></i>
+                <p>Xem và quản lý tất cả các giao dịch gửi file từ Giảng viên</p>
+                <a href="{{ url_for('admin_transactions') }}" class="btn btn-secondary">
+                    <i class="fas fa-list me-2"></i>Xem giao dịch
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Quản lý người dùng
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-user-cog fa-3x text-warning mb-3"></i>
+                <p>Xem thông tin và trạng thái hoạt động của các Giảng viên</p>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-warning">
+                    <i class="fas fa-users me-2"></i>Quản lý người dùng
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Thống kê hệ thống
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                  
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin hệ thống:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Thuật toán mã hóa:</strong> AES-256-GCM + RSA-2048 (OAEP)</li>
+                            <li><strong>Xác thực & Toàn vẹn:</strong> HMAC-SHA256 & AES-GCM Tag</li>
+                            <li><strong>Chữ ký số:</strong> RSA-PSS (SHA-256)</li>
+                            <li><strong>Bảo vệ Replay:</strong> Replay Guard (Nonce + Timestamp)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

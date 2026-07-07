@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <!-- Upgrade Status Banner -->
+        <div class="alert alert-success text-center shadow-sm border-0 mb-4 py-3" style="background: rgba(40, 167, 69, 0.15); border-left: 5px solid #28a745 !important;">
+            <h5 class="mb-1 text-success fw-bold">
+                <i class="fas fa-check-circle me-2"></i>
+                Hệ Thống Đã Được Nâng Cấp Bảo Mật Toàn Diện (Đề tài 6)
+            </h5>
+            <p class="mb-0 text-dark" style="font-size: 0.95rem;">
+                Thay thế DES bằng <strong>AES-256-GCM</strong>, RSA-1024 bằng <strong>RSA-2048 (OAEP + PSS)</strong>, và tích hợp <strong>Replay Guard</strong>.
+            </p>
+        </div>
+
+        <div class="card overflow-hidden">
+            <div class="card-body text-center p-5">
+                <div class="mb-4">
+                    <i class="fas fa-shield-halved fa-5x text-primary mb-3 animated pulse"></i>
+                    <h1 class="display-5 fw-bold text-primary">Hệ Thống Nộp Bài Tập Lớn An Toàn</h1>
+                    <p class="lead text-muted">Giải pháp truyền tải dữ liệu phân đoạn an toàn (Secure Assignment Chunk Transfer)</p>
+                    <span class="badge bg-primary px-3 py-2 fs-6 mb-3"><i class="fas fa-code-branch me-1"></i> Version 2.0 (Premium Upgrade)</span>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row my-4">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <span class="fa-stack fa-2x">
+                                    <i class="fas fa-circle fa-stack-2x text-light"></i>
+                                    <i class="fas fa-key fa-stack-1x text-primary"></i>
+                                </span>
+                            </div>
+                            <h5 class="fw-bold">AES-256-GCM</h5>
+                            <p class="text-muted small">Mã hóa xác thực AEAD mạnh mẽ thay thế DES/CBC cũ lỗi thời.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <span class="fa-stack fa-2x">
+                                    <i class="fas fa-circle fa-stack-2x text-light"></i>
+                                    <i class="fas fa-signature fa-stack-1x text-success"></i>
+                                </span>
+                            </div>
+                            <h5 class="fw-bold">RSA-2048 OAEP/PSS</h5>
+                            <p class="text-muted small">Trao đổi khóa với OAEP và ký số với PSS an toàn, bảo vệ chống giả mạo.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <span class="fa-stack fa-2x">
+                                    <i class="fas fa-circle fa-stack-2x text-light"></i>
+                                    <i class="fas fa-clock fa-stack-1x text-warning"></i>
+                                </span>
+                            </div>
+                            <h5 class="fw-bold">Replay Guard & Bcrypt</h5>
+                            <p class="text-muted small">Bảo vệ chống tấn công phát lại (Replay Attack) bằng nonce & hash mật khẩu bằng Bcrypt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if not session.user %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-md-2 px-4 shadow">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-5 shadow">
+                        <i class="fas fa-home me-2"></i>Vào hệ thống
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i>Quy Trình Hoạt Động & Cơ Chế Bảo Mật</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-user-shield fa-2x text-primary mb-2"></i>
+                            <h6 class="fw-bold">1. Đăng ký & Tạo khóa</h6>
+                            <small class="text-muted">Mật khẩu được băm bằng bcrypt. Tạo khóa RSA-2048 riêng cho mỗi người dùng.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-cubes fa-2x text-success mb-2"></i>
+                            <h6 class="fw-bold">2. Chia Chunk & Mã hóa</h6>
+                            <small class="text-muted">Tệp tin được chia nhỏ. Mỗi chunk được mã hóa bằng AES-256-GCM và ký số RSA-PSS.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
+                            <h6 class="fw-bold">3. Kiểm tra Replay Guard</h6>
+                            <small class="text-muted">Server xác minh chữ ký, HMAC-SHA256, và đối chiếu nonce/timestamp chống replay.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-file-invoice fa-2x text-info mb-2"></i>
+                            <h6 class="fw-bold">4. Ghép File & Lưu Log</h6>
+                            <small class="text-muted">Hệ thống ghép tệp tin dựa trên manifest và ghi nhận nhật ký bảo mật chi tiết.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

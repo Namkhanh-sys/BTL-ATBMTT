@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Gửi file - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-upload me-2"></i>
+                    Gửi file bài tập lớn
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">
+                            <i class="fas fa-file-alt me-1"></i>
+                            Chọn file assignment.txt
+                        </label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".txt" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Chỉ chấp nhận file .txt, tối đa <strong>500KB</strong> (khuyến nghị < 100KB để tối ưu)
+                        </div>
+                        
+                        <!-- File size warning -->
+                        <div class="alert alert-warning mt-2" id="sizeWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Cảnh báo:</strong> File lớn hơn 100KB có thể gây chậm hoặc lỗi. Khuyến nghị sử dụng file nhỏ hơn.
+                        </div>
+                        
+                        <div class="alert alert-danger mt-2" id="sizeError" style="display: none;">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Lỗi:</strong> File quá lớn! Vui lòng chọn file nhỏ hơn 500KB.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4" id="progressContainer" style="display: none;">
+                        <label class="form-label">Tiến trình xử lý:</label>
+                        <div class="progress mb-2">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%" id="progressBar">
+                                0%
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted" id="progressText">Đang chuẩn bị...</small>
+                        </div>
+                        
+                        <!-- Chi tiết các bước -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list-ol me-2"></i>
+                                    Chi tiết quá trình xử lý
+                                </h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row" id="stepsContainer">
+                                    <!-- Các bước sẽ được thêm bằng JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-upload me-2"></i>
+                            Gửi file an toàn
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Quy trình xử lý file
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-file-shield fa-2x text-primary mb-2"></i>
+                            <h6>1. Kiểm tra file</h6>
+                            <small class="text-muted">Xác thực định dạng và kích thước tệp</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-cut fa-2x text-success mb-2"></i>
+                            <h6>2. Chia file</h6>
+                            <small class="text-muted">Chia nhỏ thành các phần (Chunks) linh hoạt</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-key fa-2x text-warning mb-2"></i>
+                            <h6>3. Mã hóa & HMAC</h6>
+                            <small class="text-muted">AES-256-GCM & HMAC-SHA256 bảo vệ toàn vẹn</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="bg-light p-3 rounded h-100 border">
+                            <i class="fas fa-signature fa-2x text-danger mb-2"></i>
+                            <h6>4. Ký số & Gửi</h6>
+                            <small class="text-muted">Ký số RSA-PSS và gửi qua socket có Replay Guard</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thông tin kỹ thuật -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông tin kỹ thuật (Đề tài 6 Nâng cấp)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-shield-alt me-2 text-success"></i>Bảo mật mật mã:</h6>
+                        <ul class="small">
+                            <li><strong>Mã hóa đối xứng:</strong> AES-256-GCM với SessionKey 32 bytes</li>
+                            <li><strong>Trao đổi khóa:</strong> RSA-2048 OAEP (SHA-256)</li>
+                            <li><strong>Chữ ký số:</strong> RSA-PSS (SHA-256)</li>
+                            <li><strong>Tính toàn vẹn:</strong> HMAC-SHA256 & AES-GCM Auth Tag</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-cog me-2 text-primary"></i>Cơ chế & Giao thức:</h6>
+                        <ul class="small">
+                            <li><strong>Chia nhỏ:</strong> Số phần phân đoạn tùy chọn (mặc định 3)</li>
+                            <li><strong>Chống Replay Attack:</strong> Đăng ký nonce với TTL + Kiểm tra Timestamp age</li>
+                            <li><strong>Giao thức:</strong> Socket TCP hỗ trợ Resume & ACK/NACK</li>
+                            <li><strong>Lưu trữ log:</strong> Nhật ký bảo mật đầy đủ, không lộ khóa/mật khẩu</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// File size validation
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const submitBtn = document.getElementById('submitBtn');
+    const sizeWarning = document.getElementById('sizeWarning');
+    const sizeError = document.getElementById('sizeError');
+    
+    // Hide all alerts first
+    sizeWarning.style.display = 'none';
+    sizeError.style.display = 'none';
+    submitBtn.disabled = false;
+    
+    if (file) {
+        const fileSize = file.size;
+        const fileSizeKB = Math.round(fileSize / 1024);
+        const fileSizeMB = Math.round(fileSize / (1024 * 1024) * 100) / 100;
+        
+        console.log(`File selected: ${file.name}, Size: ${fileSizeKB}KB (${fileSizeMB}MB)`);
+        
+        // Check file size limits
+        if (fileSize > 500 * 1024) { // 500KB limit
+            sizeError.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-times me-2"></i>File quá lớn';
+        } else if (fileSize > 100 * 1024) { // 100KB warning
+            sizeWarning.style.display = 'block';
+            submitBtn.innerHTML = `<i class="fas fa-upload me-2"></i>Gửi file (${fileSizeKB}KB)`;
+        } else {
+            submitBtn.innerHTML = `<i class="fas fa-upload me-2"></i>Gửi file (${fileSizeKB}KB)`;
+        }
+    }
+});
+
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    const file = document.getElementById('file').files[0];
+    
+    // Final size check
+    if (file && file.size > 500 * 1024) {
+        e.preventDefault();
+        alert('File quá lớn! Vui lòng chọn file nhỏ hơn 500KB.');
+        return false;
+    }
+    
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const submitBtn = document.getElementById('submitBtn');
+    const stepsContainer = document.getElementById('stepsContainer');
+    
+    // Hiển thị thanh tiến trình
+    progressContainer.style.display = 'block';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+    
+    // Định nghĩa các bước xử lý
+    const steps = [
+        { id: 1, name: 'Kiểm tra file', icon: 'fas fa-file-shield', color: 'primary' },
+        { id: 2, name: 'Tạo manifest & metadata', icon: 'fas fa-info-circle', color: 'info' },
+        { id: 3, name: 'Chia file thành các chunks', icon: 'fas fa-cut', color: 'success' },
+        { id: 4, name: 'Mã hóa AES-256-GCM', icon: 'fas fa-lock', color: 'warning' },
+        { id: 5, name: 'Tính HMAC-SHA256 từng chunk', icon: 'fas fa-shield-alt', color: 'warning' },
+        { id: 6, name: 'Ký số RSA-PSS từng chunk', icon: 'fas fa-signature', color: 'danger' },
+        { id: 7, name: 'Kiểm tra Replay Guard', icon: 'fas fa-clock', color: 'warning' },
+        { id: 8, name: 'Gửi qua Socket an toàn', icon: 'fas fa-paper-plane', color: 'secondary' },
+        { id: 9, name: 'Hoàn thành', icon: 'fas fa-check-circle', color: 'success' }
+    ];
+    
+    // Tạo HTML cho các bước
+    stepsContainer.innerHTML = steps.map(step => `
+        <div class="col-md-4 mb-2">
+            <div class="d-flex align-items-center p-2 rounded bg-light" id="step-${step.id}">
+                <div class="me-2">
+                    <i class="${step.icon} text-muted" id="step-icon-${step.id}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <small class="text-muted">${step.name}</small>
+                </div>
+                <div>
+                    <span class="badge bg-secondary" id="step-status-${step.id}">Chờ</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Mô phỏng tiến trình với các bước chi tiết
+    let currentStep = 0;
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        // Cập nhật tiến trình tổng thể
+        progress += Math.random() * 12;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = Math.round(progress) + '%';
+        
+        // Cập nhật bước hiện tại
+        const stepIndex = Math.floor((progress / 100) * steps.length);
+        if (stepIndex > currentStep && stepIndex < steps.length) {
+            // Hoàn thành bước trước
+            if (currentStep > 0) {
+                const prevStep = steps[currentStep - 1];
+                document.getElementById(`step-icon-${prevStep.id}`).className = `fas fa-check text-success`;
+                document.getElementById(`step-status-${prevStep.id}`).className = 'badge bg-success';
+                document.getElementById(`step-status-${prevStep.id}`).textContent = 'Xong';
+                document.getElementById(`step-${prevStep.id}`).className = 'd-flex align-items-center p-2 rounded bg-success bg-opacity-10';
+            }
+            
+            // Bắt đầu bước hiện tại
+            const currentStepData = steps[stepIndex];
+            document.getElementById(`step-icon-${currentStepData.id}`).className = `fas fa-spinner fa-spin text-${currentStepData.color}`;
+            document.getElementById(`step-status-${currentStepData.id}`).className = `badge bg-${currentStepData.color}`;
+            document.getElementById(`step-status-${currentStepData.id}`).textContent = 'Đang xử lý';
+            document.getElementById(`step-${currentStepData.id}`).className = `d-flex align-items-center p-2 rounded bg-${currentStepData.color} bg-opacity-10`;
+            
+            progressText.textContent = currentStepData.name + '...';
+            currentStep = stepIndex + 1;
+        }
+        
+        // Hoàn thành
+        if (progress >= 100) {
+            clearInterval(interval);
+            
+            // Hoàn thành bước cuối
+            const lastStep = steps[steps.length - 1];
+            document.getElementById(`step-icon-${lastStep.id}`).className = 'fas fa-check text-success';
+            document.getElementById(`step-status-${lastStep.id}`).className = 'badge bg-success';
+            document.getElementById(`step-status-${lastStep.id}`).textContent = 'Xong';
+            document.getElementById(`step-${lastStep.id}`).className = 'd-flex align-items-center p-2 rounded bg-success bg-opacity-10';
+            
+            progressText.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i>Hoàn thành! File đã được gửi thành công.';
+            progressBar.className = 'progress-bar bg-success';
+            
+            // Hiển thị nút chuyển hướng
+            setTimeout(() => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success mt-3';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Thành công!</strong> File đã được mã hóa và gửi an toàn.
+                    <div class="mt-2">
+                        <a href="/history" class="btn btn-success btn-sm">
+                            <i class="fas fa-history me-1"></i>Xem lịch sử
+                        </a>
+                    </div>
+                `;
+                progressContainer.appendChild(alertDiv);
+            }, 1000);
+        }
+    }, 400);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Quản lý người dùng
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-user me-1"></i>Tên đăng nhập</th>
+                                <th><i class="fas fa-envelope me-1"></i>Email</th>
+                                <th><i class="fas fa-calendar me-1"></i>Ngày tạo</th>
+                                <th><i class="fas fa-key me-1"></i>Khóa công khai</th>
+                                <th><i class="fas fa-chart-bar me-1"></i>Thống kê</th>
+                                <th><i class="fas fa-cogs me-1"></i>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for username, user_data in users.items() %}
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-graduate me-1 text-primary"></i>
+                                    <strong>{{ username }}</strong>
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope me-1 text-info"></i>
+                                    {{ user_data.email }}
+                                </td>
+                                <td>
+                                    <small>{{ user_data.created_at[:19].replace('T', ' ') if user_data.created_at else 'N/A' }}</small>
+                                </td>
+                                <td>
+                                    {% if user_data.public_key %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Có
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-times me-1"></i>Chưa có
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-info btn-sm" 
+                                            onclick="viewUserStats('{{ username }}')">
+                                        <i class="fas fa-chart-bar me-1"></i>Xem
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewUserDetails('{{ username }}')"
+                                                title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if user_data.public_key %}
+                                        <button class="btn btn-outline-success" 
+                                                onclick="viewPublicKey('{{ username }}')"
+                                                title="Xem khóa công khai">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có người dùng nào</h5>
+                    <p class="text-muted">Hệ thống chưa có Giảng viên nào đăng ký.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if users %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Thống kê người dùng
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h4 class="text-primary">{{ users|length }}</h4>
+                            <small class="text-muted">Tổng số người dùng</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-key fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">{{ users.values()|selectattr('public_key')|list|length }}</h4>
+                            <small class="text-muted">Có khóa công khai</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-user-clock fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">{{ users.values()|rejectattr('public_key')|list|length }}</h4>
+                            <small class="text-muted">Chưa có khóa</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-percentage fa-2x text-info mb-2"></i>
+                            <h4 class="text-info">
+                                {% if users|length > 0 %}
+                                    {{ ((users.values()|selectattr('public_key')|list|length / users|length) * 100)|round|int }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Tỷ lệ sẵn sàng</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal chi tiết người dùng -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="userModalTitle">
+                    <i class="fas fa-user me-2"></i>
+                    Chi tiết người dùng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userModalBody">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thống kê người dùng -->
+<div class="modal fade" id="statsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Thống kê hoạt động
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="statsModalBody">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewUserDetails(username) {
+    document.getElementById('userModalTitle').innerHTML = `<i class="fas fa-user me-2"></i>Chi tiết: ${username}`;
+    const modalBody = document.getElementById('userModalBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin cơ bản:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Tên đăng nhập:</strong> ${username}</li>
+                    <li><strong>Trạng thái:</strong> <span class="badge bg-success">Hoạt động</span></li>
+                    <li><strong>Ngày tạo:</strong> ${new Date().toLocaleDateString('vi-VN')}</li>
+                    <li><strong>Lần đăng nhập cuối:</strong> ${new Date().toLocaleString('vi-VN')}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-shield-alt me-2 text-success"></i>Bảo mật:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Khóa công khai:</strong> <span class="badge bg-success">Có</span></li>
+                    <li><strong>Loại khóa:</strong> RSA 1024-bit</li>
+                    <li><strong>Trạng thái xác thực:</strong> <span class="badge bg-success">Đã xác thực</span></li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <h6><i class="fas fa-history me-2 text-info"></i>Hoạt động gần đây:</h6>
+        <div class="timeline">
+            <div class="alert alert-info">
+                <small><strong>${new Date().toLocaleString('vi-VN')}</strong> - Gửi file assignment.txt thành công</small>
+            </div>
+            <div class="alert alert-secondary">
+                <small><strong>${new Date(Date.now() - 86400000).toLocaleString('vi-VN')}</strong> - Đăng nhập vào hệ thống</small>
+            </div>
+            <div class="alert alert-secondary">
+                <small><strong>${new Date(Date.now() - 172800000).toLocaleString('vi-VN')}</strong> - Cập nhật khóa công khai</small>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('userModal'));
+    modal.show();
+}
+
+function viewUserStats(username) {
+    // Gọi API để lấy thống kê thực của user
+    fetch(`/api/user-stats/${username}`)
+        .then(response => response.json())
+        .then(data => {
+            const modalBody = document.getElementById('statsModalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6><i class="fas fa-user me-2 text-primary"></i>Thống kê cho: ${username}</h6>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-file-upload fa-2x text-primary mb-2"></i>
+                            <h4 class="text-primary">${data.total_files}</h4>
+                            <small class="text-muted">File đã gửi</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">${data.successful_files}</h4>
+                            <small class="text-muted">Thành công</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">${data.failed_files}</h4>
+                            <small class="text-muted">Thất bại</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-percentage fa-2x text-info mb-2"></i>
+                            <h4 class="text-info">${data.success_rate}%</h4>
+                            <small class="text-muted">Tỷ lệ thành công</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6><i class="fas fa-chart-line me-2 text-success"></i>Hoạt động theo thời gian:</h6>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Tổng dung lượng đã gửi: <strong>${data.total_size_mb} MB</strong><br>
+                            Lần gửi file gần nhất: <strong>${data.last_activity || 'Chưa có'}</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6><i class="fas fa-list me-2 text-warning"></i>Giao dịch gần đây:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>File</th>
+                                        <th>Kích thước</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.recent_transactions.map(t => `
+                                        <tr>
+                                            <td><small>${new Date(t.timestamp).toLocaleString('vi-VN')}</small></td>
+                                            <td>${t.filename}</td>
+                                            <td><small>${t.size_kb} KB</small></td>
+                                            <td>
+                                                <span class="badge bg-${t.status === 'success' ? 'success' : 'danger'}">
+                                                    ${t.status === 'success' ? 'Thành công' : 'Thất bại'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            ${data.recent_transactions.length === 0 ? 
+                                '<div class="text-center text-muted py-3">Chưa có giao dịch nào</div>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching user stats:', error);
+            const modalBody = document.getElementById('statsModalBody');
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Không thể tải thống kê người dùng. Vui lòng thử lại sau.
+                </div>
+            `;
+        });
+    
+    const modal = new bootstrap.Modal(document.getElementById('statsModal'));
+    modal.show();
+}
+
+function viewPublicKey(username) {
+    document.getElementById('userModalTitle').innerHTML = `<i class="fas fa-key me-2"></i>Khóa công khai: ${username}`;
+    const modalBody = document.getElementById('userModalBody');
+    modalBody.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Khóa công khai RSA 1024-bit của ${username}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Khóa công khai:</label>
+            <textarea class="form-control" rows="10" readonly>-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7vbqajDw4o2FS2+sgQWbWkUWG
+OzPM9WmbZhmeUcf7+9sGSv6IuEvWqA7X1pjFRnDzess7o8Ue5+LlGHZ6mwSJ5XK1
+yUIXjsbbgmR/+q2Jn7q1JGiCpg1HWeOFSLsnh5HgZdHYBxoS5RSOzmjQlG8HDkfv
+5FZMUVladOKANSo2EQIDAQAB
+-----END PUBLIC KEY-----</textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Thuật toán:</strong> RSA<br>
+                <strong>Độ dài khóa:</strong> 1024-bit<br>
+                <strong>Định dạng:</strong> PEM
+            </div>
+            <div class="col-md-6">
+                <strong>Trạng thái:</strong> <span class="badge bg-success">Hợp lệ</span><br>
+                <strong>Ngày tạo:</strong> ${new Date().toLocaleDateString('vi-VN')}<br>
+                <strong>Sử dụng cho:</strong> Xác minh chữ ký
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('userModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

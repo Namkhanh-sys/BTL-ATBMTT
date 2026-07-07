@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý khóa - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-key me-2"></i>
+                    Quản lý khóa RSA 1024-bit
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if has_public_key %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Bạn đã có khóa công khai trong hệ thống!
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Bạn chưa có khóa công khai. Vui lòng tạo mới hoặc tải lên khóa có sẵn.
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Tạo khóa mới
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Hệ thống sẽ tạo cặp khóa RSA 1024-bit mới cho bạn.</p>
+                                <ul class="text-muted small">
+                                    <li>Khóa công khai sẽ được lưu trong hệ thống</li>
+                                    <li>Khóa riêng sẽ được tải xuống máy của bạn</li>
+                                    <li>Bạn cần bảo mật khóa riêng cẩn thận</li>
+                                </ul>
+                                <form method="POST">
+                                    <div class="d-grid">
+                                        <button type="submit" name="generate" class="btn btn-success">
+                                            <i class="fas fa-magic me-2"></i>
+                                            Tạo khóa mới
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Tải lên khóa có sẵn
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Nếu bạn đã có khóa RSA, hãy dán khóa công khai vào đây.</p>
+                                <form method="POST">
+                                    <div class="mb-3">
+                                        <label for="public_key" class="form-label">Khóa công khai RSA:</label>
+                                        <textarea class="form-control" id="public_key" name="public_key" 
+                                                rows="8" placeholder="-----BEGIN PUBLIC KEY-----
+...
+-----END PUBLIC KEY-----" required></textarea>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" name="upload" class="btn btn-info">
+                                            <i class="fas fa-upload me-2"></i>
+                                            Tải lên khóa
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if private_key %}
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Khóa riêng - BẢO MẬT TUYỆT ĐỐI
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-danger">
+                                    <strong>CẢNH BÁO:</strong> Đây là khóa riêng của bạn. Hãy sao chép và lưu trữ an toàn. 
+                                    Không chia sẻ khóa này với bất kỳ ai!
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Khóa riêng RSA:</label>
+                                    <textarea class="form-control" rows="15" readonly id="privateKeyText">{{ private_key }}</textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary" onclick="copyPrivateKey()">
+                                        <i class="fas fa-copy me-2"></i>Sao chép
+                                    </button>
+                                    <button class="btn btn-success" onclick="downloadPrivateKey()">
+                                        <i class="fas fa-download me-2"></i>Tải xuống
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông tin về khóa RSA
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-key me-2 text-primary"></i>Khóa công khai:</h6>
+                        <ul>
+                            <li>Được lưu trữ trong hệ thống</li>
+                            <li>Dùng để xác minh chữ ký của bạn</li>
+                            <li>An toàn khi chia sẻ</li>
+                            <li>Độ dài: 1024-bit</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-lock me-2 text-danger"></i>Khóa riêng:</h6>
+                        <ul>
+                            <li>Chỉ bạn được biết và lưu trữ</li>
+                            <li>Dùng để ký số các file gửi đi</li>
+                            <li>Tuyệt đối không chia sẻ</li>
+                            <li>Mất khóa = mất khả năng gửi file</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyPrivateKey() {
+    const textarea = document.getElementById('privateKeyText');
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Hiển thị thông báo
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check me-2"></i>Đã sao chép!';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-success');
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+    }, 2000);
+}
+
+function downloadPrivateKey() {
+    const privateKey = document.getElementById('privateKeyText').value;
+    const blob = new Blob([privateKey], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'private_key.pem';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

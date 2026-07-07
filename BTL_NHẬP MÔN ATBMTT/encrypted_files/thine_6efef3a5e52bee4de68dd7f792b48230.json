@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "filename": "thine_text.txt_1751007860.txt",
+    "timestamp": "2025-06-27T14:04:20.172060",
+    "parts": 3,
+    "size": 162
+  },
+  "metadata_signature": "AXFWwG7Z+y9ZhbvHTQiHfpbJiMUspON/2X19RowSPYOb5831Ihn0ihg/mzu21kCElu22r0HoTlXHaYL7lqrRptZjcRTNNJ4nGLKaR2FqNqVF0I757AAh8RR9DbWFmNMphVcn2I9P1CejIY4xxLIqdVB3qut2eHpib1bkc0DM2vU=",
+  "encrypted_session_key": "P9uGMUa4CujB0L5AW8zKjIjceoLhCoTJ06dRD+yFmwFbXiRSWIYQEdlb5vWLVq5GbCCRoWdrDZfipXCY2v5Os8KCdLx0a8n5rEuLuytyk6sMauF0u0UE2frNLkxPmG4k3eymGc3H/3brNf1InN9eERley1KsvrU4rD3sjDOWoBw=",
+  "parts": [
+    {
+      "iv": "G8/a42Ik++U=",
+      "cipher": "0SHjcSJrxuIcDlFMdX9MHcAoIUew6kF/6oFnHcHQsreyGYHQHjcsaQgn5iLdjOKnL9QtZ0G23/o=",
+      "hash": "12610d0f4771f137260854713ef4cc018684791245e983d3b26b7a7da39e28ad56ae5db9fb25aaa2d6bd27b2dde5f0bd4fa80ab4b26b67fb1126d56e1d4ac72f",
+      "sig": "EWADCCSObYRlUsQV+I7tcPiYF7kW0ZV1c7hyiUwjVmX3MfasT1CuTm0BUPQGHxxcpfX0l/VCDgnNfrOKF5ZgEwjxqxoAGn0RxN14wVxDwr4gsMIwqlElwG+ftQi6+S/ltQlN20GzUMGwx4tjv+/jti9pMllcjCUz3hC537nBNHw="
+    },
+    {
+      "iv": "7RnerY7XJgE=",
+      "cipher": "+kfLFUM39ujtUzPelw/w/Gj7xDNLAVAtWrrBPGPHKidHO+78Cgk7fB3EZCRt+gWevBW/AY7Hu6Q=",
+      "hash": "360d634d324abbd6a2d7482795fdbeb7c67af4fb316a9951b6af8820989aac3ff25f94fe02fe8c2e0ccb446a479df3792056692c1a7f3fc4add7dd454c9967d5",
+      "sig": "Kj5fDDCPyRyRSUvy2dAqP29yth34sYSl1yIXFHDVT5YeFmY4MHXwfhW2bNiwf/zlxRXCY0a3nsC4rVv6+J9Wa5GJuyiaxNY/6Nv9bwGfVQXx/EgF3bQd/fOigyfkQa8462IzvGb4tnnHE1jAkpWOXxpmjzmKPFhNBzVScOryPFQ="
+    },
+    {
+      "iv": "jFTJXAMKV3E=",
+      "cipher": "ffiYue79WiLa7IQS31/ArPZa6z8v2snEx0wRMbssBI/xmBKDbkEmZuAqjqij9KTGdQdP7XWkmz4=",
+      "hash": "31fbf2299107f04eee016556ef81539c001dd826a9dac95bccfeb7f5481806029037cba323c03acf0c6c42d56437d4aa528d4dc640a8f0cba5f19eeadfedef02",
+      "sig": "c2NqgIPkUq1TY8weT10fFUiPWYjAavQeqz+YHU7QE14k3WG3JPPjLxM15LimHrXhNcfSjkwBElLYnbAIYOT9QG8/Dst/5QAOovIpCdlodeYSnyYIeuS+XOI08G9LTDJWTcXiWdSRbBRVmuqKbKUtGbk7CdSV2ruf+GXKTORoW00="
+    }
+  ]
+}

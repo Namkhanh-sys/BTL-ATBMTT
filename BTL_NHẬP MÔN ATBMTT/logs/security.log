@@ -1,0 +1,41 @@
+[2026-06-17 15:29:44] [WARNING] [KEY_GENERATE      ] Old RSA key < 2048-bit detected, regenerating
+[2026-06-17 15:29:45] [INFO   ] [SESSION           ] Socket server started on localhost:9999
+[2026-06-17 15:29:46] [INFO   ] [SESSION           ] Application started
+[2026-06-17 15:30:52] [INFO   ] [REGISTER          ] user=namkhanh1, email=knamkanh@gmail.com
+[2026-06-17 15:31:03] [INFO   ] [LOGIN             ] user=namkanh1, ip=127.0.0.1 -> FAILED
+[2026-06-17 15:31:09] [INFO   ] [LOGIN             ] user=namkhanh1, ip=127.0.0.1 -> SUCCESS
+[2026-06-17 15:32:05] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA-temp, size=2048bit
+[2026-06-17 15:32:05] [INFO   ] [MANIFEST_CREATE   ] Manifest created: file_id=73986db2-eb75-4896-8ccd-0115f1657284, chunks=3
+[2026-06-17 15:32:05] [INFO   ] [HANDSHAKE         ] addr=127.0.0.1:61630 -> SUCCESS
+[2026-06-17 15:32:05] [INFO   ] [MANIFEST_VERIFY   ] file_id=73986db2-eb75-4896-8ccd-0115f1657284 -> VALID
+[2026-06-17 15:32:05] [INFO   ] [KEY_EXCHANGE      ] Session key decrypted for file_id=73986db2-eb75-4896-8ccd-0115f1657284
+[2026-06-17 15:32:05] [INFO   ] [UPLOAD_START      ] user=namkhanh1, file=namkhanh1_baitaplon.txt_1781685124.txt, file_id=73986db2-eb75-4896-8ccd-0115f1657284, chunks=3
+[2026-06-17 15:32:05] [INFO   ] [CHUNK_RECV        ] file_id=73986db2-eb75-4896-8ccd-0115f1657284, chunk=1/3 -> VERIFIED
+[2026-06-17 15:32:05] [INFO   ] [CHUNK_RECV        ] file_id=73986db2-eb75-4896-8ccd-0115f1657284, chunk=2/3 -> VERIFIED
+[2026-06-17 15:32:05] [INFO   ] [CHUNK_RECV        ] file_id=73986db2-eb75-4896-8ccd-0115f1657284, chunk=3/3 -> VERIFIED
+[2026-06-17 15:32:05] [INFO   ] [FILE_RECONSTRUCT  ] File hash verified: e3b0c44298fc1c14...
+[2026-06-17 15:32:05] [INFO   ] [FILE_RECONSTRUCT  ] file_id=73986db2-eb75-4896-8ccd-0115f1657284, file=namkhanh1_baitaplon.txt_1781685124.txt -> SUCCESS
+[2026-06-17 15:32:05] [INFO   ] [UPLOAD_COMPLETE   ] file_id=73986db2-eb75-4896-8ccd-0115f1657284, user=namkhanh1 -> SUCCESS
+[2026-06-17 15:32:20] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA, size=2048bit
+[2026-06-17 15:33:01] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA, size=2048bit
+[2026-06-17 15:33:06] [WARNING] [ERROR             ] User namkhanh1 tried to upload private key as public key
+[2026-06-17 15:33:12] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA, size=2048bit
+[2026-06-17 15:37:57] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA, size=2048bit
+[2026-06-17 15:41:33] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA, size=2048bit
+[2026-06-17 15:42:21] [INFO   ] [KEY_GENERATE      ] user=namkhanh1, type=RSA-temp, size=2048bit
+[2026-06-17 15:42:21] [INFO   ] [MANIFEST_CREATE   ] Manifest created: file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, chunks=3
+[2026-06-17 15:42:21] [INFO   ] [HANDSHAKE         ] addr=127.0.0.1:50955 -> SUCCESS
+[2026-06-17 15:42:21] [INFO   ] [MANIFEST_VERIFY   ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe -> VALID
+[2026-06-17 15:42:21] [INFO   ] [KEY_EXCHANGE      ] Session key decrypted for file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe
+[2026-06-17 15:42:21] [INFO   ] [UPLOAD_START      ] user=namkhanh1, file=namkhanh1_baitaplon.txt_1781685740.txt, file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, chunks=3
+[2026-06-17 15:42:21] [INFO   ] [CHUNK_RECV        ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, chunk=1/3 -> VERIFIED
+[2026-06-17 15:42:21] [INFO   ] [CHUNK_RECV        ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, chunk=2/3 -> VERIFIED
+[2026-06-17 15:42:21] [INFO   ] [CHUNK_RECV        ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, chunk=3/3 -> VERIFIED
+[2026-06-17 15:42:21] [INFO   ] [FILE_RECONSTRUCT  ] File hash verified: e3b0c44298fc1c14...
+[2026-06-17 15:42:21] [INFO   ] [FILE_RECONSTRUCT  ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, file=namkhanh1_baitaplon.txt_1781685740.txt -> SUCCESS
+[2026-06-17 15:42:21] [INFO   ] [UPLOAD_COMPLETE   ] file_id=a14aa3df-e98c-40fc-9f06-154d2f72ddfe, user=namkhanh1 -> SUCCESS
+[2026-06-17 15:47:08] [INFO   ] [LOGOUT            ] user=namkhanh1
+[2026-06-17 15:47:23] [INFO   ] [LOGIN             ] user=admin:admin, ip=127.0.0.1 -> FAILED
+[2026-06-17 15:47:30] [INFO   ] [LOGIN             ] user=admin:admin, ip=127.0.0.1 -> SUCCESS
+[2026-06-17 15:51:15] [INFO   ] [LOGOUT            ] user=admin
+[2026-06-17 15:51:27] [INFO   ] [LOGIN             ] user=admin:admin, ip=127.0.0.1 -> SUCCESS

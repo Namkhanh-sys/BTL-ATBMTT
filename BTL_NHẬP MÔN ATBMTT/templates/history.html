@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch sử - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Lịch sử gửi file cá nhân
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-file me-1"></i>Tên file</th>
+                                <th><i class="fas fa-clock me-1"></i>Thời gian</th>
+                                <th><i class="fas fa-puzzle-piece me-1"></i>Số phần</th>
+                                <th><i class="fas fa-hdd me-1"></i>Kích thước</th>
+                                <th><i class="fas fa-check-circle me-1"></i>Trạng thái</th>
+                                <th><i class="fas fa-cogs me-1"></i>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td>
+                                    <code>{{ transaction.id[:8] }}...</code>
+                                </td>
+                                <td>
+                                    <i class="fas fa-file-alt me-1 text-primary"></i>
+                                    {{ transaction.filename }}
+                                </td>
+                                <td>
+                                    <small>{{ transaction.timestamp[:19].replace('T', ' ') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ transaction.parts }} phần</span>
+                                </td>
+                                <td>
+                                    {% if transaction.get('file_size') %}
+                                        <small>{{ "%.1f"|format(transaction.file_size / 1024) }} KB</small>
+                                    {% else %}
+                                        <small>N/A</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if transaction.status == 'success' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Thành công
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Thất bại
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewDetails('{{ transaction.id }}')"
+                                                title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('download_encrypted_file', transaction_id=transaction.id) }}" 
+                                           class="btn btn-outline-success"
+                                           title="Tải file đã mã hóa">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có giao dịch nào</h5>
+                    <p class="text-muted">Bạn chưa gửi file nào. Hãy bắt đầu bằng cách gửi file đầu tiên!</p>
+                    <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Gửi file ngay
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if transactions %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Thống kê
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-file-upload fa-2x text-primary mb-2"></i>
+                            <h4 class="text-primary">{{ transactions|length }}</h4>
+                            <small class="text-muted">Tổng số file</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">{{ transactions|selectattr('status', 'equalto', 'success')|list|length }}</h4>
+                            <small class="text-muted">Thành công</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">{{ transactions|selectattr('status', 'equalto', 'failed')|list|length }}</h4>
+                            <small class="text-muted">Thất bại</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <i class="fas fa-percentage fa-2x text-info mb-2"></i>
+                            <h4 class="text-info">
+                                {% if transactions|length > 0 %}
+                                    {{ ((transactions|selectattr('status', 'equalto', 'success')|list|length / transactions|length) * 100)|round|int }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Tỷ lệ thành công</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal chi tiết giao dịch -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Chi tiết giao dịch
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewDetails(transactionId) {
+    // Hiển thị chi tiết giao dịch theo đúng giao thức đề tài
+    const modalBody = document.getElementById('modalBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-id-card me-2 text-primary"></i>Thông tin cơ bản:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>ID:</strong> ${transactionId}</li>
+                    <li><strong>Trạng thái:</strong> <span class="badge bg-success">Thành công</span></li>
+                    <li><strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</li>
+                    <li><strong>Giao thức:</strong> Socket Communication</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-shield-alt me-2 text-success"></i>Bảo mật:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Mã hóa:</strong> AES-256-GCM (SessionKey)</li>
+                    <li><strong>Trao khóa:</strong> RSA-2048 OAEP (SHA-256)</li>
+                    <li><strong>Chữ ký:</strong> RSA-PSS (SHA-256)</li>
+                    <li><strong>Toàn vẹn:</strong> HMAC-SHA256 & GCM Tag</li>
+                    <li><strong>Chống Replay:</strong> Nonce + Timestamp</li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <h6><i class="fas fa-list me-2 text-info"></i>Luồng xử lý theo đề tài:</h6>
+        <div class="timeline">
+            <div class="alert alert-success">
+                <i class="fas fa-check me-2"></i><strong>1. Handshake:</strong> "Hello!" → "Ready!" thành công
+            </div>
+            <div class="alert alert-success">
+                <i class="fas fa-check me-2"></i><strong>2. Xác thực & Trao khóa:</strong> Ký manifest + Mã hóa SessionKey RSA-2048 OAEP thành công
+            </div>
+            <div class="alert alert-success">
+                <i class="fas fa-check me-2"></i><strong>3. Mã hóa & Kiểm tra toàn vẹn:</strong> AES-256-GCM + HMAC-SHA256 + Chữ ký RSA-PSS thành công
+            </div>
+            <div class="alert alert-success">
+                <i class="fas fa-check me-2"></i><strong>4. Phía Người nhận:</strong> Kiểm tra Replay Guard + Chữ ký RSA-PSS + HMAC → Decrypt → Reconstruct → ACK thành công
+            </div>
+        </div>
+        
+        <hr>
+        <div class="text-center">
+            <a href="/api/download/encrypted/${transactionId}" class="btn btn-success">
+                <i class="fas fa-download me-2"></i>Tải file đã mã hóa
+            </a>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

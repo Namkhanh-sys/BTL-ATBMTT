@@ -1,0 +1,260 @@
+```
+DuAn9/
+├── app.py
+├── routes/
+│   ├── __init__.py
+│   ├── auth.py
+│   ├── file.py
+│   └── user.py
+├── sockets.py
+├── utils.py
+├── data/
+│   ├── users/
+│   ├── chats/
+│   ├── files/
+├── uploads/
+│   ├── avatars/
+│   ├── files/
+│   └── decrypted/
+├── static/
+│   ├── css/
+│   │   ├── style.css
+│   │   └── bootstrap.min.css
+│   ├── js/
+│   │   ├── main.js
+│   │   ├── auth.js
+│   │   ├── fileTransfer.js
+│   │   ├── chat.js
+│   │   ├── history.js
+│   │   ├── bootstrap.bundle.min.js
+│   │   └── forge.min.js
+│   ├── images/
+│   │   ├── default-avatar.png
+│   │   └── shield-icon.png
+├── templates/
+│   ├── base.html
+│   ├── login.html
+│   ├── register.html
+│   ├── index.html
+│   └── history.html
+├── requirements.txt
+└── README.md
+
+# Nội dung các file
+
+## app.py
+from flask import Flask, render_template, send_from_directory
+from flask_socketio import SocketIO
+from routes.auth import auth_bp
+from routes.file import file_bp
+from routes.user import user_bp
+from sockets import register_socketio_events
+import os
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['DATA_FOLDER'] = 'data'
+
+app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(file_bp, url_prefix='/file')
+app.register_blueprint(user_bp, url_prefix='/user')
+
+socketio = SocketIO(app, async_mode='eventlet')
+register_socketio_events(socketio)
+
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, port=5000)
+
+## routes/__init__.py
+# File trống để đánh dấu thư mục là package
+
+## routes/auth.py
+from flask import Blueprint, request, jsonify
+import os
+import json
+from werkzeug.security import generate_password_hash, check_password_hash
+from ..utils import get_user_file, save_user_file
+
+auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role')
+    public_key = data.get('publicKey')
+
+    if not all([username, password, role, public_key]):
+        return jsonify({'error': 'Thiếu thông tin'}), 400
+
+    users_dir = os.path.join(app.config['DATA_FOLDER'], 'users')
+    os.makedirs(users_dir, exist_ok=True)
+    user_file = os.path.join(users_dir, f'{username}.json')
+
+    if os.path.exists(user_file):
+        return jsonify({'error': 'Người dùng đã tồn tại'}), 400
+
+    password_hash = generate_password_hash(password)
+    user_data = {
+        'username': username,
+        'password_hash': password_hash,
+        'role': role,
+        'public_key': public_key,
+        'status': 'offline'
+    }
+    save_user_file(username, user_data)
+    return jsonify({'message': 'Đăng ký thành công'}), 201
+
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    user_file = get_user_file(username)
+    if not user_file:
+        return jsonify({'error': 'Người dùng không tồn tại'}), 400
+
+    user_data = json.load(open(user_file))
+    if check_password_hash(user_data['password_hash'], password):
+        return jsonify({'username': username, 'role': user_data['role']})
+    else:
+        return jsonify({'error': 'Thông tin đăng nhập không hợp lệ'}), 400
+
+## routes/file.py
+from flask import Blueprint, request, jsonify
+import os
+import json
+import time
+from ..utils import save_file_metadata
+
+file_bp = Blueprint('file', __name__)
+
+@file_bp.route('/upload', methods=['POST'])
+def upload():
+    data = request.json
+    sender = data.get('sender')
+    receiver = data.get('receiver')
+    file_data = data.get('fileData')
+
+    if not all([sender, receiver, file_data]):
+        return jsonify({'error': 'Thiếu thông tin'}), 400
+
+    file_id = str(int(time.time()))
+    file_meta = {
+        'file_id': file_id,
+        'sender': sender,
+        'receiver': receiver,
+        'file_data': file_data,
+        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+    }
+    save_file_metadata(file_id, file_meta)
+    return jsonify({'message': 'File đã được gửi'}), 200
+
+@file_bp.route('/download/<file_id>', methods=['GET'])
+def download(file_id):
+    files_dir = os.path.join(app.config['DATA_FOLDER'], 'files')
+    file_path = os.path.join(files_dir, f'{file_id}.json')
+    if os.path.exists(file_path):
+        return jsonify(json.load(open(file_path)))
+    else:
+        return jsonify({'error': 'File không tồn tại'}), 404
+
+## routes/user.py
+from flask import Blueprint, jsonify
+import os
+import json
+from ..utils import get_user_file
+
+user_bp = Blueprint('user', __name__)
+
+@user_bp.route('/list', methods=['GET'])
+def list_users():
+    users_dir = os.path.join(app.config['DATA_FOLDER'], 'users')
+    users = []
+    for filename in os.listdir(users_dir):
+        if filename.endswith('.json'):
+            user_data = json.load(open(os.path.join(users_dir, filename)))
+            users.append({
+                'username': user_data['username'],
+                'role': user_data['role'],
+                'status': user_data['status']
+            })
+    return jsonify(users)
+
+@user_bp.route('/publicKey/<username>', methods=['GET'])
+def get_public_key(username):
+    user_file = get_user_file(username)
+    if not user_file:
+        return jsonify({'error': 'Người dùng không tồn tại'}), 404
+    user_data = json.load(open(user_file))
+    return jsonify({'publicKey': user_data['public_key']})
+
+## sockets.py
+from flask_socketio import emit
+import os
+import json
+import time
+from ..utils import save_chat_history
+
+def register_socketio_events(socketio):
+    online_users = set()
+
+    @socketio.on('connect')
+    def handle_connect():
+        print('Người dùng kết nối')
+
+    @socketio.on('userOnline')
+    def handle_user_online(username):
+        online_users.add(username)
+        emit('userStatus', {'username': username, 'status': 'online'}, broadcast=True)
+
+    @socketio.on('chatMessage')
+    def handle_chat_message(data):
+        sender = data['sender']
+        receiver = data['receiver']
+        message = data['message']
+        chat_file = os.path.join('data/chats', f'{sender}_{receiver}.json')
+        chat_history = []
+        if os.path.exists(chat_file):
+            chat_history = json.load(open(chat_file))
+        chat_history.append({'sender': sender, 'message': message, 'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')})
+        save_chat_history(f'{sender}_{receiver}', chat_history)
+        emit('chatMessage', {'sender': sender, 'message': message}, to=receiver)
+
+    @socketio.on('fileSent')
+    def handle_file_sent(data):
+        sender = data['sender']
+        receiver = data['receiver']
+        file_data = data['fileData']
+        emit('fileReceived', {'sender': sender, 'fileData': file_data}, to=receiver)
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        for username in online_users.copy():
+            emit('userStatus', {'username': username, 'status': 'offline'}, broadcast=True)
+            online_users.remove(username)
+
+## utils

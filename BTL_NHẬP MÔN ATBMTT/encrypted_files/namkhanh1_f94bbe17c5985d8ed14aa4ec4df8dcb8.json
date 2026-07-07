@@ -1,0 +1,73 @@
+{
+  "manifest": {
+    "file_id": "73986db2-eb75-4896-8ccd-0115f1657284",
+    "original_filename": "namkhanh1_baitaplon.txt_1781685124.txt",
+    "total_chunks": 3,
+    "total_size": 0,
+    "file_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender": "namkhanh1",
+    "nonce": "1b27f06fc5cf87a060390707c8b16fd9",
+    "timestamp": "2026-06-17T08:32:05.545797+00:00",
+    "session_id": "bd33575eae9a5235634bb7d0166aa4d9",
+    "chunks": [
+      {
+        "chunk_id": "8d2bde5c-889a-4a88-8685-430e323e9298",
+        "sequence_number": 1,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "chunk_id": "318972af-aa32-4a29-acaa-dd1ea56c1fa1",
+        "sequence_number": 2,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "chunk_id": "2347e0a4-56b2-4b12-88fd-a3b9ff7dc494",
+        "sequence_number": 3,
+        "size": 0,
+        "chunk_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "manifest_signature": "q4EGMrO5BCNspUPPvmzGfZYV8HvaZPZcibBxSiB3jZfwqKzFlGvNHKUPu4YtSLeykye0/O6l3CHpOS7gHrb6dmQ/aHq3NKIi1pCP40D+UoUnyOz7irkqqoMGmXM7lo1dJTgI8PddxOy+5eX6XTn+C66i3zlAp9s7v1oz8Hg1c2cAJskfrZ9yJCzvgJ9v2SQuU6K8JTozTiZI8OM2aNGpIWJ5dp02xORYEVsxzonadYMQITVLRjIF/q/gh7GOQOrjntWtz/wAPoQ7EXsOQHlp4mX2TLw1qpXUNg8ASX0lrDGoQwyKLOmDOKEFsCU7FG+INDJfkpK69G4IhhqICh/dFw==",
+  "encrypted_session_key": "iJpKxBjPE33e3XbelrULarfuvq2BhelODI4PU7BpQHU0Bq95zcgYbw+n95mv1EEJzgdAbu1brYKmlK9ijc27OCPrGpPg9KEuTESTZMchsvoa1aYEILG/GnspE3ofoAVUNGSKRtGTQJdyvXcrutcGC5NZtePFuGdb9Uo6kW+rEunxnrgz3NxKkNEdjYE2vA7woiZkk22YdFWPDQfVcRoh2miyCfGlVvBYL4hILKEp2P6iSUQuxvWpUj+TDs3QobJley/0/F8SrTSoHx8vbBw0GPCfyEUDc0USIVlPPhoSXKayzx4kOavwYJ4Bi3InRs6L6w8QTeiQmMQVBUBNVH2peA==",
+  "chunks": [
+    {
+      "file_id": "73986db2-eb75-4896-8ccd-0115f1657284",
+      "chunk_id": "8d2bde5c-889a-4a88-8685-430e323e9298",
+      "sequence_number": 1,
+      "total_chunks": 3,
+      "nonce": "JXG9w67KiYIu9BMR",
+      "timestamp": "2026-06-17T08:32:05.639394+00:00",
+      "cipher": "",
+      "tag": "+Af8vTPGVoCHahZLxqk++g==",
+      "hmac": "0f716737dfee4a0f029a183ee8e24fc5001278a4e36f44729d45378a8b58780f",
+      "sig": "QqPvYC1/JPBlEDBT9MRhbxhC84jsearLazaegmWwPcoeqaaOjQlxdj+BpacyvH8Dnyie4sSsvINSykXTMWj2g7y1ft5wvzjMPa4oapuXgDOekpkjClC9VeqWt8XRuuJg1cFbZplQYioJuxMV76Rgtj4tyRgzrmKYM3y0qbFNqY7J3lUQ+RulAG1pp5fCgn6Nzs2a4LG/gVRQEwzuKpJpGfaCK3gQePRZkhGPQkOhml3br2HY7QGzL7e2sCYauNUNc9lDyYlshZOh7hFDvgfEHRukweCT57lW7+/11PVbgsFqXcf0F3JEB0T7GUhcSgoVGk7g4vcjvH4wIVCEuj3OHg=="
+    },
+    {
+      "file_id": "73986db2-eb75-4896-8ccd-0115f1657284",
+      "chunk_id": "318972af-aa32-4a29-acaa-dd1ea56c1fa1",
+      "sequence_number": 2,
+      "total_chunks": 3,
+      "nonce": "d0HOY+vewxG7LvUd",
+      "timestamp": "2026-06-17T08:32:05.685470+00:00",
+      "cipher": "",
+      "tag": "2UfSYOez22obN+ulgO7ncA==",
+      "hmac": "ea8fa1163b31f6c73b0e9b2d13dd4846b03ae6cecb1927da691fbd7787781915",
+      "sig": "kg+iUp9keiQj2++3yye/wGKAwBpKiy+lWNRHzAc0U53qiO0egqqpl6UQgqQS+ymPkyoDx9YBFnPxlEmzc919KFwEFIi4fkk5sgY3HfWMjrhpsbNwaMUOc1dq5YWTLKDnkaHa+68azLyvhbu460mEC1MAOs5Ug+nsIV9RcHg3QJlldLwGnVkBY44mjJlCKq9rcSWowwx4/MMQlDBV4hUW9PlBg6DPJqwMLpDPNKTDg+Si64i6Iu0AX8+VQSkoQyNVgMY7Qtv7jBZpO2QIzHIEef0V2Uerb1KTzYcIsMvn0rrzcLCxfZ4NGwWgRxgvnrMwUPhzHLa7pWx8jZhRkqke9Q=="
+    },
+    {
+      "file_id": "73986db2-eb75-4896-8ccd-0115f1657284",
+      "chunk_id": "2347e0a4-56b2-4b12-88fd-a3b9ff7dc494",
+      "sequence_number": 3,
+      "total_chunks": 3,
+      "nonce": "11jDh+q9BTlcWpdA",
+      "timestamp": "2026-06-17T08:32:05.730556+00:00",
+      "cipher": "",
+      "tag": "D6lF/zfPgeOYVwd8GkRxkw==",
+      "hmac": "1e2c46d989df2d0e2421879902bf76de7e57b38f28ce309866a047c9c1e8bdf8",
+      "sig": "IC1nFxsg9cvBA+h8F48ojjqQP8mTIfPRiK4AdwxkrxkV3RjOXkb1RrflbNEURpxlvFPaea08E9quluMgusIiD1032KXqCe5RMDoip1szGpfASorujB4Fywcf1NiUqgNzl1i9WHGd84JIhRUKjm2ITu/11jOvV2yvwaTi2jVKhjMuxNpUe1VPcwWT6+xgpgZJiz1EUfYRVcvL4h0fHL+ZmQcEb1yb7xQlS1/b4bEdKk2lg7Z8oBI32Gz+5mweMOr9cZaUp01CdiYEjbfVawZiOHymnX/noTweQsvBZIjPznxzpep1nqsFkSjUnTppVhVQv8lP08cVHsTH+2urKRZT8g=="
+    }
+  ]
+}

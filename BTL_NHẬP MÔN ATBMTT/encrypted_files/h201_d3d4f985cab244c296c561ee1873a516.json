@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "filename": "h201_assignment_small.txt_1751294381.txt",
+    "timestamp": "2025-06-30T21:39:41.782438",
+    "parts": 3,
+    "size": 521
+  },
+  "metadata_signature": "OKDa75qo0sPzN23QTdiq0y6fARHGn0/eEFyAVcG8PAeDXxSk1xxL3E/Y2ZhCbH13o9EjauxcIM0EStf+PyYkk13W8RpFDkTKCUBpqMBeBIaaXHsWgN/qWpEdBC0BSQ+gl9ymhYwtUzHAKvrI4uNcSGWW7tvs5eyi7jc9vtGQAJ8=",
+  "encrypted_session_key": "27Vp75lIu9r8zi0WXAaMmppLIkmNVr7z/8m1sYampMKFSno9Xn71jIlWvz1XXb5u7cVxcdCds+lLPArVyVECka095M72zevvgt7EXqZtN18/2cn6L6vmzOivVkjkqbd7q/eemT0TaZYH78FGDWVIlXWXbBYEmn16vUotIEF2AfU=",
+  "parts": [
+    {
+      "iv": "LfLgCFH7oKg=",
+      "cipher": "Gc18cVnwge1Sn1BuX89HDXREOrkLQigHg0z8hptYtRP1cOT3q2K8sj1wR6DgrH+Grf4JKtieJwBMZdaV3JXjPGPoli3dNgwXaN93H/Xc7XBL6Wj8vJ03JY2xrFl+QsoHTtPx3yQomoCXnH+3BRfo3324+dAnhuunGhK5nzteJtln8tgWtec2wSb6BXWSqGo32bfwAM+5wdopHSmnxVQFyJ5INXe+veVXpc+l2N6jv2w=",
+      "hash": "e5bd783d5cdb19d2d6fae9efb4a374637f2db45b3cab8c230586965fbe1d4460f0c22c6176c013510649535a1d49ecd47cae8907259ae3942690640068eaecda",
+      "sig": "QbYnTewdhqDJTqXuaqKDi0NAdkPMh3Oz2B1qpG7mIrPhHwQYp0dZvBbcGRapjplpRDWyye3qUR2wLTbp4yo6CKfaGkzrD4jEuCxug5+cFnIojTkbNe6vdNlx7V2+n6bQxtpSBPQTo6YKQjL2SX7xh4ubJANf0dLGnsiYx2fhqoE="
+    },
+    {
+      "iv": "IaMu5LSGp4w=",
+      "cipher": "kivfkJzRgobngh1wK3X59fu/5sMgQNEsPJZuOZ/H022MdPUUjpoo4wAfMVHRt/ArWt573dO2m20BUO59q3ZnKh6ZYOch/hNHxEE8O1F5YKwA1aLuMKF9nxuCxVs15T3BmwfybruL4Q8YFhOyt3CTz9STfjuGpdsHfV0J1n4LKeFOmaSC4ADDHanl0gF8e49a3HNLnkHXEc08u6RuvfBM5nLY6Og5qEsBgAMqat2ouf0=",
+      "hash": "e6a94b628ea2d228bbd920d0842abc32065c6f90dd38aba0951b333528918a1eb9f22fca77de22148613a7f12090d8e0084d882bb98317d6544befacba94239a",
+      "sig": "gbRKijm/XHR2Ewg6iK902xFaU3Edy2+d/VWMWw1jn0J/aX9Rm2bPV6q1RpooiX0XtMGsKf644/UWDO92Y3W9sNZU5eX4b8S39uMRFkZ2jDhEJOu6XolLiB2ghITmnocO9uwVYYOUljqFx9k6NzLcgPpAXXIYB09Nqb63lDpL610="
+    },
+    {
+      "iv": "OLl5aOro2hs=",
+      "cipher": "LDXKKrJQ7TdAtJZSekIguBY9R2GVfq/2w4T2G5D0VLiQ/3oWQVCWgBdHsROKpQMU9ZvcXTwfGfLVcsIeA+OAtD8mzWpch69iWy+QYRyiWT2KYLYRLyZ28X9+teq39kuVRricwGdaXAH72PcsTcRJwg3h1LCgLb0ES7UrM5UpGJSubzRg55zb3bhvL+I2VQCknmr5NrDuWp5Kl6slCivjfhtnqzlFwF9HyA/gHta11OE=",
+      "hash": "d6736ee97f7bf68c1c0cbd82a762097844f2c71ed5e2c2aaea03ae0dd2a968d33e6f30e09707d79d59df91adac180a7b925ff7d97dfec1c2daa007970dfc3548",
+      "sig": "gq/w6aqdrSAdoIpwC77qYdmz0c3lk/B16LGnplW4ivETqYuE+WuXqSZXYWmm6nS1tNDhLUvvdtjFqpqMIudygIMTTo5rACEPXv0prUwyaSmXIqGx5IR1GcAskaLeY1zZ6Vj5LCGPxGh8pRY8ZzaTLq5cPldM6Iz3+2KKzqN5UNE="
+    }
+  ]
+}
