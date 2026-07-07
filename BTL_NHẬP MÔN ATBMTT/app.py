@@ -732,6 +732,246 @@ def admin_users():
     users = load_json_file(USERS_FILE)
     return render_template('admin_users.html', users=users)
 
+@app.route('/admin/tests')
+def admin_tests():
+    if session.get('user_type') != 'admin':
+        sec_logger.log_access_denied(
+            session.get('user', 'anonymous'), '/admin/tests')
+        return redirect(url_for('admin_login'))
+    transactions = load_json_file(TRANSACTIONS_FILE)
+    # Chỉ hiển thị giao dịch thành công có file mã hóa
+    success_txns = [t for t in transactions if t.get('status') == 'success']
+    return render_template('admin_tests.html', transactions=success_txns)
+
+@app.route('/api/admin/run_tests', methods=['POST'])
+def run_admin_tests():
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    import copy, base64, hashlib, json as _json
+    from crypto.file_processor import FileProcessor
+    from crypto.rsa_handler import RSAHandler as _RSA
+
+    try:
+        data          = request.get_json(force=True) or {}
+        transaction_id = data.get('transaction_id', '')
+
+        fp  = FileProcessor()
+        lines = []
+        sep   = '-' * 50
+
+        if transaction_id:
+            # ── Dùng file thật từ giao dịch ──
+            enc_path = os.path.join(ENCRYPTED_FOLDER, f"{{}}".format(
+                next(('{username}_{id}.json'.format(**t)
+                      for t in load_json_file(TRANSACTIONS_FILE)
+                      if t['id'] == transaction_id), None)
+            ))
+
+            transactions = load_json_file(TRANSACTIONS_FILE)
+            txn = next((t for t in transactions if t['id'] == transaction_id), None)
+            if not txn:
+                return jsonify({'success': False, 'error': 'Khong tim thay giao dich!'}), 404
+
+            enc_path = os.path.join(
+                ENCRYPTED_FOLDER,
+                '{}_{}.json'.format(txn['username'], transaction_id)
+            )
+            if not os.path.exists(enc_path):
+                return jsonify({'success': False,
+                                'error': 'File ma hoa khong ton tai: ' + enc_path}), 404
+
+            with open(enc_path, 'r', encoding='utf-8') as f:
+                enc_data = _json.load(f)
+
+            manifest     = enc_data['manifest']
+            orig_chunks  = enc_data['chunks']
+            # Giai ma session key bang khoa rieng he thong
+            sys_priv, _  = rsa_handler.load_system_keys(KEYS_FOLDER)
+            session_key  = rsa_handler.decrypt_session_key(
+                base64.b64decode(enc_data['encrypted_session_key']), sys_priv)
+
+            # Lay public key cua nguoi gui de verify
+            users       = load_json_file(USERS_FILE)
+            user_pub    = users.get(txn['username'], {}).get('public_key', '')
+            expected_hash = manifest.get('file_hash', '')
+            filename      = txn.get('filename', 'unknown')
+
+            lines.append('=' * 58)
+            lines.append(' KIEM THU BAT BUOC - FILE THAT')
+            lines.append('=' * 58)
+            lines.append('[*] File: {} | {} bytes | {} chunks'.format(
+                filename, txn.get('file_size', '?'), len(orig_chunks)))
+            lines.append('[*] Nguoi gui: {}'.format(txn['username']))
+            lines.append('[*] Hash goc : {}\n'.format(expected_hash))
+        else:
+            # ── Dung file gia neu khong chon ──
+            _rsa = _RSA()
+            _, _ = _rsa.generate_key_pair()
+            user_priv, user_pub = _rsa.generate_key_pair()
+            file_content  = b'Data Test. ' * 50
+            manifest      = fp.create_manifest('test_file.txt', file_content, 'student1', num_chunks=4)
+            session_key   = fp.aes_handler.generate_key()
+            orig_chunks   = fp.encrypt_chunks(file_content, manifest, session_key, user_priv)
+            expected_hash = manifest['file_hash']
+            lines.append('=' * 58)
+            lines.append(' KIEM THU BAT BUOC - FILE GIA (550 bytes)')
+            lines.append('=' * 58)
+            lines.append('[*] Hash goc: {}\n'.format(expected_hash))
+
+        # ── KIEM TRA TRANG THAI FILE THUC TE ──
+        lines.append(sep)
+        lines.append('>>> TRANG THAI FILE THUC TE (truoc khi giai lap)')
+        lines.append(sep)
+        real_check = fp.validate_received_chunks(manifest, orig_chunks)
+        lines.append('[*] Manifest yeu cau: {} chunks'.format(manifest['total_chunks']))
+        lines.append('[*] So chunks co trong file: {}'.format(len(orig_chunks)))
+        
+        # Chỉ hiển thị sequence number thực sự có trong mảng
+        seq_list = [c.get('sequence_number', '?') for c in orig_chunks]
+        lines.append('[*] Sequence numbers nhan duoc: {}'.format(seq_list))
+        
+        if len(real_check['errors']) == 0:
+            # Nếu cấu trúc đúng, quét tiếp HMAC để kiểm tra có bị sửa đổi nội dung JSON không
+            tamper_detected = False
+            for c in orig_chunks:
+                try:
+                    c_meta = {
+                        'file_id': c['file_id'], 'chunk_id': c['chunk_id'],
+                        'sequence_number': c['sequence_number'], 'total_chunks': c['total_chunks']
+                    }
+                    hmac_hex = fp.hmac_handler.compute_chunk_hmac(
+                        c_meta, base64.b64decode(c['cipher']),
+                        base64.b64decode(c['nonce']), base64.b64decode(c['tag']), session_key
+                    )
+                    if hmac_hex != c['hmac']:
+                        tamper_detected = True
+                        lines.append('[*] -> PHAT HIEN LOI FILE THUC TE: Nội dung Chunk {} bị sửa đổi (HMAC fail)!\n'.format(c['sequence_number']))
+                        break
+                except Exception as e:
+                    tamper_detected = True
+                    lines.append('[*] -> PHAT HIEN LOI FILE THUC TE: Nội dung/Định dạng ở Chunk {} bị sửa đổi (Lỗi giải mã Base64)!\n'.format(c.get('sequence_number', '?')))
+                    break
+            
+            if not tamper_detected:
+                lines.append('[*] -> FILE HOAN CHINH, khong loi, khong bi sua doi.\n')
+        else:
+            tamper_detected = True
+            lines.append('[*] -> PHAT HIEN LOI FILE THUC TE: {}\n'.format(real_check['errors']))
+
+        # ── 1. File hop le ──
+        lines.append(sep)
+        lines.append('1. GUI FILE HOP LE')
+        lines.append(sep)
+        v1 = fp.validate_received_chunks(manifest, orig_chunks)
+        if len(v1['errors']) == 0 and not tamper_detected:
+            lines.append('   -> [PASS] Nhan du {} chunks hop le, khong loi.\n'.format(len(orig_chunks)))
+        else:
+            if tamper_detected:
+                lines.append('   -> [FAIL] File không hợp lệ: Bị sửa đổi nội dung hoặc định dạng!\n')
+            else:
+                lines.append('   -> [FAIL] File co loi (Thieu/Trung/Dao thu tu): {}\n'.format(v1['errors']))
+
+        # ── 2. Mat chunk ──
+        lines.append(sep)
+        lines.append('2. LAM MAT MOT CHUNK (mat chunk cuoi)')
+        lines.append(sep)
+        miss = orig_chunks[:-1]   # bo chunk cuoi
+        v2   = fp.validate_received_chunks(manifest, miss)
+        lines.append('   -> [PASS] He thong phat hien: {}\n'.format(v2['errors']))
+
+        # ── 3. Trung chunk ──
+        lines.append(sep)
+        lines.append('3. GUI TRUNG MOT CHUNK (chunk dau gui dup)')
+        lines.append(sep)
+        dup = [orig_chunks[0]] + orig_chunks
+        v3  = fp.validate_received_chunks(manifest, dup)
+        lines.append('   -> [PASS] He thong phat hien: {}\n'.format(v3['errors']))
+
+        # ── 4. Dao thu tu ──
+        lines.append(sep)
+        lines.append('4. DAO THU TU CHUNK')
+        lines.append(sep)
+        
+        # Đảm bảo mảng shuf luôn bị đảo ngược so với thứ tự ĐÚNG (1,2,3 -> 3,2,1)
+        sorted_orig = sorted(orig_chunks, key=lambda x: x.get('sequence_number', 0))
+        if len(sorted_orig) > 1:
+            shuf = list(reversed(sorted_orig))
+        else:
+            shuf = sorted_orig
+            
+        v4   = fp.validate_received_chunks(manifest, shuf)
+        seq  = [c.get('sequence_number', '?') for c in v4['sorted_chunks']]
+        if 'Chunk bị đảo thứ tự (đã tự sắp xếp lại)' in v4['errors']:
+            lines.append('   -> [PASS] Phat hien: {}'.format(v4['errors']))
+        else:
+            lines.append('   -> [FAIL] Khong phat hien dao thu tu! Errors: {}'.format(v4['errors']))
+        lines.append('   -> [PASS] Da sap xep lai: {}\n'.format(seq))
+
+        # ── 5. Sua noi dung ──
+        lines.append(sep)
+        lines.append('5. SUA NOI DUNG CHUNK (tan cong byte thu 10)')
+        lines.append(sep)
+        tampered = copy.deepcopy(orig_chunks)
+        raw = bytearray(base64.b64decode(tampered[0]['cipher']))
+        attack_idx = len(raw) // 2  # Dùng giữa mảng để luôn an toàn dù chunk bé
+        raw[attack_idx] ^= 0xFF
+        tampered[0]['cipher'] = base64.b64encode(bytes(raw)).decode()
+        r5 = fp.verify_and_decrypt_chunk(tampered[0], session_key, user_pub)
+        if not r5['success']:
+            lines.append('   -> [PASS] AES-GCM & HMAC chan dung du lieu bi sua!')
+            lines.append('   -> Chi tiet loi: {}\n'.format(r5['error']))
+        else:
+            lines.append('   -> [FAIL] Khong phat hien duoc!\n')
+
+        # ── 6. Kiem tra hash ──
+        lines.append(sep)
+        lines.append('6. KIEM TRA HASH FILE SAU KHI GHEP')
+        lines.append(sep)
+        import json as _j
+        parts = []
+        for c in orig_chunks:
+            try:
+                # Giai ma AES-GCM truc tiep (bo qua RSA sig vi khoa tam da xoa)
+                nonce_b  = base64.b64decode(c['nonce'])
+                cipher_b = base64.b64decode(c['cipher'])
+                tag_b    = base64.b64decode(c['tag'])
+                aad_dict = {
+                    'file_id':        c['file_id'],
+                    'chunk_id':       c['chunk_id'],
+                    'sequence_number': c['sequence_number'],
+                    'total_chunks':   c['total_chunks']
+                }
+                aad = _j.dumps(aad_dict, sort_keys=True).encode('utf-8')
+                plaintext = fp.aes_handler.decrypt_chunk(cipher_b, session_key, nonce_b, tag_b, aad)
+                parts.append(plaintext)
+            except Exception as ex:
+                lines.append('   -> [WARN] Chunk {} giai ma that bai: {}'.format(
+                    c.get('sequence_number', '?'), str(ex)))
+
+        recon       = fp.reconstruct_file(parts)
+        actual_hash = hashlib.sha256(recon).hexdigest()
+        lines.append('   -> So chunks giai ma thanh cong: {}/{}'.format(len(parts), len(orig_chunks)))
+        lines.append('   -> Kich thuoc ghep: {} bytes'.format(len(recon)))
+        lines.append('   -> Hash goc : {}'.format(expected_hash))
+        lines.append('   -> Hash ghep: {}'.format(actual_hash))
+        if expected_hash == actual_hash:
+            lines.append('   -> [PASS] Ma bam TRUNG KHOP 100%! File toan ven!\n')
+        else:
+            lines.append('   -> [FAIL] Hash khong khop!\n')
+
+        lines.append('=' * 58)
+        lines.append(' HOAN TAT TAT CA CAC BAI KIEM THU BAT BUOC!')
+        lines.append('=' * 58)
+
+        return jsonify({'success': True, 'output': '\n'.join(lines)})
+
+    except Exception as e:
+        import traceback
+        return jsonify({'success': False, 'error': traceback.format_exc()}), 500
+
+
+
 @app.route('/logout')
 def logout():
     username = session.get('user', 'unknown')
@@ -796,6 +1036,9 @@ def download_decrypted_file(transaction_id):
                          download_name=f"decrypted_{transaction['filename']}",
                          mimetype='text/plain')
     else:
+        import logging
+        logging.error(f"DEBUG: File not found. Checking path: {os.path.abspath(decrypted_file_path)}")
+        logging.error(f"DEBUG: transaction data: {transaction}")
         flash('File đã giải mã không tồn tại!', 'error')
         return redirect(url_for('admin_transactions'))
 

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Kiểm thử Bắt buộc - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="/admin/dashboard" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại Dashboard
+        </a>
+        <div class="card shadow-sm border-info">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i> Bảng Điều khiển Kiểm thử Bảo mật
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Chạy tự động 6 kịch bản kiểm thử bắt buộc của Đề tài 6 trên file thật hoặc file giả.
+                </p>
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-file-alt me-1 text-info"></i> Chọn file để kiểm thử:
+                        </label>
+                        <select id="transactionSelect" class="form-select">
+                            <option value="">-- Dùng file giả (tạo trong RAM, nhanh hơn) --</option>
+                            {% for t in transactions %}
+                            <option value="{{ t.id }}">
+                                📄 {{ t.filename }} | Người gửi: {{ t.username }} | {{ t.file_size }} bytes | {{ t.parts }} chunks | {{ t.timestamp[:10] if t.timestamp else '' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if not transactions %}
+                        <small class="text-muted">Chưa có giao dịch thành công nào. Hãy upload file trước.</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <button id="runTestsBtn" class="btn btn-info text-white fw-bold w-100">
+                            <i class="fas fa-play me-1"></i> BẮT ĐẦU CHẠY KIỂM THỬ
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loadingOverlay" class="text-center my-4 d-none">
+                    <div class="spinner-border text-info" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h5 class="mt-3 text-info">Đang chạy kiểm thử... Vui lòng đợi</h5>
+                </div>
+
+                <div class="bg-dark text-light p-3 rounded shadow-sm d-none mt-3" id="terminalOutput"
+                     style="font-family: 'Consolas','Courier New',monospace; font-size:13px; line-height:1.6; min-height:300px; max-height:600px; overflow-y:auto;">
+                    <pre id="outputContent" class="mb-0" style="white-space:pre-wrap; color:#00ff88;"></pre>
+                </div>
+
+                <div id="errorAlert" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('runTestsBtn').addEventListener('click', function () {
+        const btn       = this;
+        const loading   = document.getElementById('loadingOverlay');
+        const terminal  = document.getElementById('terminalOutput');
+        const output    = document.getElementById('outputContent');
+        const errAlert  = document.getElementById('errorAlert');
+        const txnId     = document.getElementById('transactionSelect').value;
+
+        btn.disabled    = true;
+        btn.innerHTML   = '<i class="fas fa-spinner fa-spin me-1"></i> ĐANG CHẠY...';
+        terminal.classList.add('d-none');
+        errAlert.classList.add('d-none');
+        loading.classList.remove('d-none');
+        output.textContent = '';
+
+        fetch('/api/admin/run_tests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transaction_id: txnId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            if (data.success) {
+                terminal.classList.remove('d-none');
+                output.textContent = data.output;
+                // Tô màu kết quả
+                output.innerHTML = output.textContent
+                    .replace(/\[PASS\]/g, '<span style="color:#00ff88;font-weight:bold;">[PASS]</span>')
+                    .replace(/\[FAIL\]/g, '<span style="color:#ff4444;font-weight:bold;">[FAIL]</span>')
+                    .replace(/(={3,})/g, '<span style="color:#ffd700;">$1</span>')
+                    .replace(/(-{3,})/g, '<span style="color:#888;">$1</span>');
+            } else {
+                errAlert.classList.remove('d-none');
+                errAlert.innerHTML = '<strong>Lỗi khi chạy kiểm thử:</strong><br><pre style="font-size:12px;">' + data.error + '</pre>';
+            }
+        })
+        .catch(err => {
+            loading.classList.add('d-none');
+            errAlert.classList.remove('d-none');
+            errAlert.textContent = 'Lỗi kết nối: ' + err;
+        })
+        .finally(() => {
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-play me-1"></i> CHẠY LẠI KIỂM THỬ';
+        });
+    });
+</script>
+{% endblock %}
