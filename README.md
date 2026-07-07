@@ -226,15 +226,3 @@ PYTHONIOENCODING=utf-8 python app.py
 3. Chọn file giao dịch đã upload từ dropdown
 4. Bấm **"BẮT ĐẦU CHẠY KIỂM THỬ"** → 6 kịch bản chạy tự động và in kết quả ra màn hình
 
----
-
-## 👨‍💻 Thành viên thực hiện
-
-- **Đề tài:** FIT4012 — Đề tài 6: Secure System Upgrade Challenge
-- **Môn học:** Nhập môn An toàn Bảo mật Thông tin
-
----
-
-## 📄 License
-
-MIT License
