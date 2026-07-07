@@ -1,0 +1,15 @@
+BÀI TẬP LỚN MÔN HỌC: NHẬP MÔN AN TOÀN BẢO MẬT THÔNG TIN (FIT4012)
+ĐỀ TÀI: NGHIÊN CỨU VÀ TRIỂN KHAI HỆ THỐNG TRUYỀN TẬP TIN AN TOÀN CHIA CHUNKS
+
+Họ và tên sinh viên thực hiện: Nguyễn Văn A, Trần Thị B
+Mã số sinh viên: 22020001, 22020002
+Lớp: K67-CLC
+
+Tóm tắt nội dung thực hiện:
+1. Đã nâng cấp thành công hệ thống mật mã từ DES sang AES-256-GCM bảo vệ tính bí mật và toàn vẹn của từng phân đoạn dữ liệu.
+2. Đã triển khai RSA-2048 OAEP kết hợp SHA-256 cho việc trao đổi khóa phiên ngẫu nhiên.
+3. Đã cấu hình cơ chế ký số RSA-PSS cho Manifest và từng chunk đảm bảo xác thực nguồn gốc giảng viên.
+4. Đã tích hợp Replay Guard (Nonce + Timestamp TTL) phát hiện và ngăn chặn tấn công gửi lại.
+5. Đã triển khai Security Logger ghi nhận đầy đủ nhật ký kiểm toán bảo mật và xử lý lỗi logic chunks.
+
+Tệp tin mẫu này được sử dụng để kiểm thử luồng truyền dữ liệu phân đoạn qua Socket TCP của ứng dụng.

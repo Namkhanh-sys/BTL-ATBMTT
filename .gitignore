@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Project generated folders
+BTL_NHẬP MÔN ATBMTT/keys/
+BTL_NHẬP MÔN ATBMTT/logs/
+BTL_NHẬP MÔN ATBMTT/data/
+BTL_NHẬP MÔN ATBMTT/uploads/
+BTL_NHẬP MÔN ATBMTT/encrypted_files/
+BTL_NHẬP MÔN ATBMTT/decrypted_files/
+BTL_NHẬP MÔN ATBMTT/static/images/nen.jpg
+BTL_NHẬP MÔN ATBMTT/static/images/logo.jpg
+
+# OS files
+.DS_Store
+Thumbs.db
