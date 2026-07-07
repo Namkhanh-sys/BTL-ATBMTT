@@ -1,4 +1,4 @@
-VIDEO DEMO: https://drive.google.com/file/d/1tQl1NqPBkKoC6bVBRXTee-yy52s45ABV/view
+
 # 🔐 Secure File Transfer System (Đề tài 6 Nâng cấp)
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)
@@ -227,3 +227,4 @@ PYTHONIOENCODING=utf-8 python app.py
 3. Chọn file giao dịch đã upload từ dropdown
 4. Bấm **"BẮT ĐẦU CHẠY KIỂM THỬ"** → 6 kịch bản chạy tự động và in kết quả ra màn hình
 
+VIDEO DEMO: https://drive.google.com/file/d/1tQl1NqPBkKoC6bVBRXTee-yy52s45ABV/view
