@@ -1,3 +1,4 @@
+VIDEO DEMO: https://drive.google.com/file/d/1tQl1NqPBkKoC6bVBRXTee-yy52s45ABV/view
 # 🔐 Secure File Transfer System (Đề tài 6 Nâng cấp)
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)
