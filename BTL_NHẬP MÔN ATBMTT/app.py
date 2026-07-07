@@ -475,7 +475,6 @@ class SocketServer:
                                           metadata_json.get('metadata', {}))
             expected_hash = manifest.get('file_hash')
             if expected_hash:
-                import hashlib
                 actual_hash = hashlib.sha256(complete_file).hexdigest()
                 if actual_hash != expected_hash:
                     sec_logger.log_hash_mismatch(
@@ -790,7 +789,7 @@ def download_decrypted_file(transaction_id):
 
     decrypted_file_path = os.path.join(
         DECRYPTED_FOLDER,
-        f"{transaction['username']}_{transaction['filename']}")
+        f"{transaction['username']}_{transaction['filename']}_{transaction.get('file_id', '')[:8]}.txt")
 
     if os.path.exists(decrypted_file_path):
         return send_file(decrypted_file_path, as_attachment=True,
@@ -872,14 +871,16 @@ def process_and_send_file_via_socket(file_path, username):
     Xử lý file và gửi qua socket - NÂNG CẤP.
     Dùng AES-GCM + RSA-2048 + manifest + chunk metadata đầy đủ.
     """
+    original_public_key = None  # Lưu khóa gốc để khôi phục sau khi gửi
     try:
         _, system_public_key_pem = rsa_handler.load_system_keys(KEYS_FOLDER)
 
-        # Tạo RSA-2048 key pair tạm thời
+        # Tạo RSA-2048 key pair tạm thời cho phiên gửi này
         temp_private_key, temp_public_key = rsa_handler.generate_key_pair()
 
         users = load_json_file(USERS_FILE)
-        users[username]['public_key'] = temp_public_key
+        original_public_key = users[username].get('public_key')  # Lưu khóa gốc trước khi ghi đè
+        users[username]['public_key'] = temp_public_key  # Tạm set để socket server verify
         save_json_file(USERS_FILE, users)
 
         sec_logger.log_key_generate(username, 'RSA-temp',
@@ -955,6 +956,16 @@ def process_and_send_file_via_socket(file_path, username):
         sec_logger.error(SecurityLogger.ERROR,
                           f"process_and_send_file_via_socket: {e}")
         return {'success': False, 'error': str(e)}
+    finally:
+        # Luôn khôi phục khóa công khai gốc của người dùng sau khi gửi xong
+        # Tránh ghi đè vĩnh viễn khóa do người dùng tự tạo từ trang /keys
+        try:
+            users_restore = load_json_file(USERS_FILE)
+            if username in users_restore:
+                users_restore[username]['public_key'] = original_public_key
+                save_json_file(USERS_FILE, users_restore)
+        except Exception:
+            pass
 
 
 def send_via_socket(manifest, manifest_signature, encrypted_session_key,
