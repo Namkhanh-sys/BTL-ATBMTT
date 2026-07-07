@@ -5,13 +5,13 @@
 ![AES-256-GCM](https://img.shields.io/badge/AES--256--GCM-✓-green?style=flat)
 ![RSA-2048](https://img.shields.io/badge/RSA--2048-OAEP%20%2B%20PSS-green?style=flat)
 ![bcrypt](https://img.shields.io/badge/Password-bcrypt%20cost%2012-green?style=flat)
-![Tests](https://img.shields.io/badge/Tests-16%20passed-brightgreen?style=flat&logo=pytest)
+![Tests](https://img.shields.io/badge/Tests-6%20kịch_bản-brightgreen?style=flat)
 
 ---
 
 ## 🎯 Giới thiệu bài toán
 
-Hệ thống này được xây dựng để mô phỏng quy trình **gửi và nhận file an toàn** trong môi trường mạng hạn chế băng thông, được nâng cấp toàn diện theo yêu cầu bảo mật của **Đề tài 6: Secure Assignment Chunk Transfer**.
+Hệ thống này được xây dựng để mô phỏng quy trình **gửi và nhận file an toàn** trong môi trường mạng hạn chế băng thông, được nâng cấp toàn diện theo yêu cầu bảo mật của **Đề tài 6: Secure Assignment Chunk Transfer - FIT4012**.
 
 ### Quy trình cũ vs Quy trình nâng cấp
 
@@ -25,6 +25,82 @@ Hệ thống này được xây dựng để mô phỏng quy trình **gửi và 
 | **Chống Replay Attack** | Không hỗ trợ | **Replay Guard** (Kiểm tra nonce + TTL + Timestamp age) |
 | **Nhật ký bảo mật** | Chỉ in console dạng thô | **Security Logger** (Ghi tệp `logs/security.log`, chuẩn UTC) |
 | **Cơ chế truyền** | Chia cố định 3 phần | **Linh hoạt số phần (Chunks) & Hỗ trợ Resume** |
+
+---
+
+## ✨ Chức năng nền (Core Features)
+
+| # | Chức năng | Mô tả |
+|---|-----------|-------|
+| 1 | **Chia file thành Chunks** | File được chia thành nhiều phần nhỏ linh hoạt để truyền qua mạng băng thông hẹp |
+| 2 | **Gửi từng chunk qua Socket TCP** | Mỗi chunk được gửi riêng lẻ qua kết nối TCP thực sự (port 9999), mô phỏng môi trường mạng thực tế |
+| 3 | **Ghép lại file hoàn chỉnh** | Server nhận đủ chunks, sắp xếp theo `sequence_number` và nối lại thành file gốc |
+| 4 | **Kiểm tra file sau khi ghép** | So sánh SHA-256 hash của file ghép với hash gốc trong Manifest — đảm bảo toàn vẹn 100% |
+
+---
+
+## 🔒 Yêu cầu bảo mật đã đạt
+
+| # | Yêu cầu | Trạng thái |
+|---|---------|-----------|
+| 1 | Mỗi chunk có `file_id`, `chunk_id`, `sequence_number`, `total_chunks`, `nonce`, `tag` | ✅ ĐẠT |
+| 2 | Mỗi chunk được mã hóa & xác thực riêng biệt (AES-256-GCM + HMAC + RSA-PSS) | ✅ ĐẠT |
+| 3 | Có Manifest mô tả toàn bộ file (file_hash, total_chunks, sender, timestamp) | ✅ ĐẠT |
+| 4 | Phát hiện thiếu chunk, trùng chunk, đảo thứ tự, chunk bị sửa | ✅ ĐẠT |
+| 5 | Cơ chế Resume — tự động yêu cầu gửi lại chunk bị thiếu | ✅ ĐẠT |
+
+---
+
+## 🧪 Kiểm thử bắt buộc (Mandatory Test Cases)
+
+Hệ thống cung cấp **Bảng điều khiển kiểm thử** tại Admin Dashboard, cho phép chạy 6 kịch bản kiểm thử bắt buộc trên **file thật đã upload**.
+
+| TC | Kịch bản | Kết quả mong đợi | Trạng thái |
+|----|----------|-----------------|-----------|
+| TC01 | Gửi file hợp lệ | `[PASS] Nhận đủ 3 chunks hợp lệ` | ✅ PASS |
+| TC02 | Làm mất một chunk | `[FAIL] Thiếu chunk: [X]` — Hệ thống báo cụ thể chunk nào bị mất | ✅ PASS |
+| TC03 | Gửi trùng một chunk | `[FAIL] Trùng chunk: [X]` — Lọc bỏ bản sao, giữ lại 1 | ✅ PASS |
+| TC04 | Đảo thứ tự chunk | Phát hiện đảo thứ tự, tự sắp xếp lại `[1, 2, 3]` | ✅ PASS |
+| TC05 | Sửa nội dung một chunk | `[FAIL] HMAC/AES-GCM chan dung — nội dung bị sửa đổi!` | ✅ PASS |
+| TC06 | Kiểm tra hash file sau ghép | So sánh SHA-256 — Hash khớp 100% hoặc báo [FAIL] nếu sai | ✅ PASS |
+
+### Định dạng gói tin Chunk (JSON)
+
+```json
+{
+  "file_id": "<UUID>",
+  "chunk_id": "<UUID>",
+  "sequence_number": 1,
+  "total_chunks": 3,
+  "nonce": "<Base64>",
+  "timestamp": "2026-07-07T08:37:39.605919+00:00",
+  "cipher": "<Base64 — Nội dung mã hóa AES-256-GCM>",
+  "tag": "<Base64 — Authentication Tag GCM>",
+  "hmac": "<Hex — HMAC-SHA256 của chunk>",
+  "sig": "<Base64 — Chữ ký RSA-PSS>"
+}
+```
+
+### Định dạng Manifest mẫu
+
+```json
+{
+  "manifest": {
+    "file_id": "<UUID>",
+    "original_filename": "File_Mau_Demo.txt",
+    "total_chunks": 3,
+    "total_size": 4000,
+    "file_hash": "<SHA-256 của file gốc>",
+    "sender": "namkhanh2",
+    "nonce": "<Hex>",
+    "timestamp": "2026-07-07T08:37:39.515000+00:00",
+    "session_id": "<UUID>"
+  },
+  "manifest_signature": "<RSA-PSS Signature — Base64>",
+  "encrypted_session_key": "<RSA-OAEP Encrypted AES Key — Base64>",
+  "chunks": [ "...3 chunk objects..." ]
+}
+```
 
 ---
 
@@ -45,46 +121,6 @@ Hệ thống này được xây dựng để mô phỏng quy trình **gửi và 
 
 ---
 
-## ✨ Các chức năng chính
-
-1. **Đăng ký, đăng nhập người dùng an toàn**
-   - Tài khoản được lưu trữ an toàn bằng **bcrypt** chống tấn công Rainbow Table.
-2. **Quản lý khóa RSA-2048**
-   - Người dùng tự tạo cặp khóa RSA-2048 hoặc tải lên khóa công khai có sẵn.
-3. **Handshake an toàn**
-   - Đồng thuận khởi động phiên gửi nhận file qua Socket TCP.
-4. **Mã hóa khóa phiên lai (Hybrid Cryptosystem)**
-   - Sinh khóa phiên AES-256 ngẫu nhiên cho mỗi giao dịch.
-   - Mã hóa khóa phiên bằng RSA-2048 OAEP.
-5. **Phân đoạn và Mã hóa Chunks**
-   - File được chia thành nhiều phần linh hoạt.
-   - Mỗi phần được mã hóa bằng AES-256-GCM, tính HMAC-SHA256 và ký số RSA-PSS.
-   - Định dạng gói tin chunk gửi qua Socket:
-     ```json
-     {
-       "file_id": "<UUID>",
-       "chunk_id": "<UUID>",
-       "sequence_number": "<int>",
-       "total_chunks": "<int>",
-       "nonce": "<Base64>",
-       "timestamp": "<ISO-8601>",
-       "cipher": "<Base64>",
-       "tag": "<Base64>",
-       "hmac": "<Hex>",
-       "sig": "<Signature_Base64>"
-     }
-     ```
-6. **Cơ chế Replay Guard & Phục hồi (Resume)**
-   - Server kiểm tra chặn các gói tin trùng lặp nonce hoặc timestamp quá hạn (5 phút).
-   - Nếu thiếu chunk, server gửi NACK để client truyền lại đúng chunk bị thiếu.
-7. **Nhật ký bảo mật (Audit Logs)**
-   - Mọi sự kiện đăng nhập, mã hóa, lỗi, tấn công replay đều được lưu tại `logs/security.log`.
-8. **Trang quản trị Admin**
-   - Xem toàn bộ giao dịch, danh sách người dùng, thống kê hệ thống.
-   - Tải xuống file đã giải mã.
-
----
-
 ## 🏗️ Kiến trúc hệ thống
 
 ```
@@ -99,12 +135,18 @@ Người dùng (Trình duyệt)
          ▼
 ┌─────────────────────┐      ┌──────────────────────────┐
 │   Socket Server     │      │     Crypto Modules       │
-│  (SocketServer)     │─────►│  ┌─ AESGCMHandler        │
+│  (Thread riêng)     │─────►│  ┌─ AESGCMHandler        │
 │                     │      │  ├─ RSAHandler (2048)     │
 │  1. Handshake       │      │  ├─ HMACHandler           │
 │  2. Verify Manifest │      │  ├─ ReplayGuard           │
 │  3. Verify Chunks   │      │  └─ FileProcessor         │
 │  4. Reconstruct     │      └──────────────────────────┘
+└─────────────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│  Admin Dashboard    │  ← Bảng kiểm thử 6 kịch bản
+│  /admin/tests       │     (Chạy trên file thật)
 └─────────────────────┘
 ```
 
@@ -115,42 +157,26 @@ Người dùng (Trình duyệt)
 ```
 BTL_NHẬP MÔN ATBMTT/
 │
-├── app.py                    # Ứng dụng chính: Flask routes + Socket Server
+├── app.py                    # Ứng dụng chính: Flask routes + Socket Server + Test API
 ├── security_logger.py        # Module ghi nhật ký bảo mật
 ├── requirements.txt          # Danh sách thư viện Python
+├── kiem_thu_bat_buoc.py      # Script kiểm thử CLI (6 kịch bản)
 │
 ├── crypto/                   # Package mật mã học
-│   ├── __init__.py
 │   ├── aes_gcm_handler.py    # AES-256-GCM: mã hóa/giải mã chunk
 │   ├── rsa_handler.py        # RSA-2048 OAEP (mã hóa) + PSS (ký số)
 │   ├── hmac_handler.py       # HMAC-SHA256: xác thực thông điệp
-│   ├── hash_handler.py       # SHA-512: hàm băm
+│   ├── hash_handler.py       # SHA-256: hàm băm
 │   ├── replay_guard.py       # Chống Replay Attack (nonce + timestamp)
 │   ├── file_processor.py     # Chia/ghép file, tạo manifest, mã hóa chunk
 │   └── des_handler.py        # DES/CBC (Legacy - chỉ để so sánh)
 │
 ├── templates/                # Giao diện HTML
 │   ├── base.html             # Layout chung
-│   ├── index.html            # Trang chủ
-│   ├── login.html            # Đăng nhập người dùng
-│   ├── register.html         # Đăng ký người dùng
-│   ├── dashboard.html        # Bảng điều khiển người dùng
 │   ├── upload.html           # Upload & gửi file
-│   ├── keys.html             # Quản lý khóa RSA-2048
-│   ├── history.html          # Lịch sử giao dịch
-│   ├── admin_login.html      # Đăng nhập admin
 │   ├── admin_dashboard.html  # Bảng điều khiển admin
-│   ├── admin_users.html      # Quản lý người dùng (admin)
-│   └── admin_transactions.html  # Quản lý giao dịch (admin)
-│
-├── static/                   # Tài nguyên tĩnh (CSS, JS, hình ảnh)
-│   └── images/
-│
-├── tests/                    # Kiểm thử tự động
-│   └── test_security.py      # 16 test cases (Unit & Integration)
-│
-├── sample_data/              # Dữ liệu mẫu để test
-│   └── assignment.txt
+│   ├── admin_tests.html      # 🆕 Trang kiểm thử 6 kịch bản bắt buộc
+│   └── ...
 │
 │   ── Các thư mục tự động tạo khi chạy (KHÔNG commit lên Git) ──
 ├── keys/                     # Khóa RSA hệ thống (tự sinh)
@@ -179,23 +205,36 @@ pip install -r requirements.txt
 ### 3. Khởi chạy ứng dụng
 
 ```bash
+# Windows
+set PYTHONIOENCODING=utf-8
 python app.py
+
+# macOS / Linux
+PYTHONIOENCODING=utf-8 python app.py
 ```
 
 Ứng dụng sẽ tự động:
-1. Tạo các thư mục lưu trữ cần thiết (`uploads/`, `encrypted_files/`, `decrypted_files/`, `keys/`, `logs/`, `data/`).
-2. Khởi tạo cơ sở dữ liệu giả lập (`users.json`, `admin.json`).
-3. Tự động sinh khóa hệ thống RSA-2048 nếu chưa tồn tại.
-4. Khởi chạy **Socket Server** chạy nền ở cổng `9999`.
-5. Khởi chạy ứng dụng **Web Flask** ở địa chỉ: [http://localhost:5000](http://localhost:5000).
+1. Tạo các thư mục lưu trữ cần thiết.
+2. Tự động sinh khóa hệ thống RSA-2048 nếu chưa tồn tại.
+3. Khởi chạy **Socket Server** chạy nền ở cổng `9999`.
+4. Khởi chạy ứng dụng **Web Flask** ở địa chỉ: [http://localhost:5000](http://localhost:5000).
 
-### 4. Chạy kiểm thử bảo mật (Security Tests)
-Để chạy toàn bộ 16 trường hợp kiểm thử tự động (Unit & Integration tests) và kiểm tra tính toàn vẹn của mã nguồn, chạy lệnh:
-```bash
-pytest
-```
-hoặc:
-```bash
-python -m pytest tests/
-```
+### 4. Chạy kiểm thử bắt buộc (qua Web)
 
+1. Đăng nhập bằng tài khoản **Admin**
+2. Vào **Admin Dashboard** → bấm **"Mở bảng Điều khiển Kiểm thử"**
+3. Chọn file giao dịch đã upload từ dropdown
+4. Bấm **"BẮT ĐẦU CHẠY KIỂM THỬ"** → 6 kịch bản chạy tự động và in kết quả ra màn hình
+
+---
+
+## 👨‍💻 Thành viên thực hiện
+
+- **Đề tài:** FIT4012 — Đề tài 6: Secure System Upgrade Challenge
+- **Môn học:** Nhập môn An toàn Bảo mật Thông tin
+
+---
+
+## 📄 License
+
+MIT License
